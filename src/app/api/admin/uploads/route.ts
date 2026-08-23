@@ -7,10 +7,14 @@ import { parsePagination } from "@/lib/validations/pagination";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/admin/uploads?page=1&pageSize=24
+ * GET /api/admin/uploads?page=1&pageSize=24&q=searchterm
  *
- * Auth-gated. Returns a paginated list of uploaded images, newest first.
- * Used by the ImagePicker's "Library" grid and the media library page.
+ * Auth-gated. Returns a paginated list of ACTIVE (non-deleted) uploaded
+ * images, newest first. Supports optional filename search via ?q=.
+ *
+ * Used by:
+ *   - ImagePicker's "Library" grid (Phase 2.2)
+ *   - Media library page (Phase 2.3)
  *
  * Response (200):
  *   { items: [{id, filename, path, mimetype, size, width, height, createdAt}],
@@ -30,9 +34,17 @@ export async function GET(request: Request) {
     page: Number(searchParams.get("page")) || 1,
     pageSize: Number(searchParams.get("pageSize")) || 24,
   });
+  const q = (searchParams.get("q") || "").trim();
+
+  // Active filter: deletedAt IS NULL. Optional search by filename (contains).
+  const where = {
+    deletedAt: null,
+    ...(q ? { filename: { contains: q } } : {}),
+  };
 
   const [items, total] = await Promise.all([
     db.uploadedImage.findMany({
+      where,
       orderBy: { createdAt: "desc" },
       skip: parsed.skip,
       take: parsed.take,
@@ -47,7 +59,7 @@ export async function GET(request: Request) {
         createdAt: true,
       },
     }),
-    db.uploadedImage.count(),
+    db.uploadedImage.count({ where }),
   ]);
 
   return NextResponse.json({

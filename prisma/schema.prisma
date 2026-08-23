@@ -129,6 +129,8 @@ model AdminUser {
 
 /// আপলোড করা ছবি — মিডিয়া লাইব্রেরি ট্র্যাকিং (Phase 2)
 /// প্রতিটি আপলোড sharp দিয়ে webp-এ অপটিমাইজ করা হয়।
+/// deletedAt: soft-delete (null = active, set = trashed). File on disk
+/// is deleted immediately; the row is kept for audit/history.
 model UploadedImage {
   id           String    @id @default(cuid())
   filename     String // original filename (for display)
@@ -139,8 +141,10 @@ model UploadedImage {
   height       Int // image height in pixels
   uploadedById String?
   uploadedBy   AdminUser? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  deletedAt    DateTime? // soft-delete marker; null = active
   createdAt    DateTime  @default(now())
 
   @@index([uploadedById])
   @@index([createdAt])
+  @@index([deletedAt]) // fast filter for active (deletedAt IS NULL)
 }
