@@ -699,3 +699,132 @@ nekir-jhuri/
 ---
 
 *This guide assumes a single-server deploy. For multi-server or containerized (Kubernetes) setups, adapt §23 (Docker) and add a load balancer.*
+
+---
+
+## Appendix D — Troubleshooting: Missing Styles in Production
+
+### Symptom
+
+After deploying, the site renders as **unstyled HTML**:
+- No emerald green / gold colors (everything is black text on white, or default browser colors)
+- No custom fonts (Bengali shows in generic sans-serif, Arabic is invisible or wrong)
+- Buttons appear as plain text or default gray buttons (no rounded corners, no background)
+- Layout is squashed (no spacing between elements)
+- Cards and sections have no backgrounds, shadows, or borders
+
+### Root Cause
+
+**Next.js `output: "standalone"` does NOT automatically include `.next/static/` (CSS, fonts, JS chunks) or `public/` (images) in the standalone output.** These must be copied manually after `next build`.
+
+If you deployed only `.next/standalone/server.js` without copying these folders, the server renders HTML that references CSS/font files which **404** — so the browser gets unstyled HTML.
+
+### The Fix
+
+#### Option A — Use the built-in build script (recommended)
+
+The project includes `scripts/build.mjs` which automates `next build` + the copy step + verification:
+
+```bash
+npm run build
+# or
+bun run build
+```
+
+This script:
+1. Runs `next build`
+2. Copies `.next/static/` → `.next/standalone/.next/static/` (CSS + fonts + JS)
+3. Copies `public/` → `.next/standalone/public/` (images)
+4. Verifies all critical files exist (CSS, fonts, JS chunks, images)
+5. Prints a summary with file counts and sizes
+
+**You must deploy the ENTIRE `.next/standalone/` folder**, not just `server.js`.
+
+#### Option B — Manual copy (if you ran `next build` directly)
+
+If you ran `npx next build` instead of `npm run build`, run these commands:
+
+```bash
+# Linux / macOS
+cp -r .next/static .next/standalone/.next/
+cp -r public .next/standalone/
+
+# Windows (PowerShell)
+Copy-Item -Path .next\static -Destination .next\standalone\.next\ -Recurse -Force
+Copy-Item -Path public -Destination .next\standalone\ -Recurse -Force
+```
+
+### Verification
+
+After building, verify the critical files exist:
+
+```bash
+# CSS file(s) must exist
+ls .next/standalone/.next/static/css/*.css
+
+# Font files must exist (.woff2)
+ls .next/standalone/.next/static/media/*.woff2
+
+# JS chunks must exist
+ls .next/standalone/.next/static/chunks/ | head
+
+# Images must exist
+ls .next/standalone/public/images/
+```
+
+Then start the server and test:
+
+```bash
+NODE_ENV=production node .next/standalone/server.js &
+
+# Check the HTML references a CSS file
+curl -s http://localhost:3000 | grep -o '/_next/static/css/[^"]*\.css'
+
+# Check the CSS file is actually served (should return CSS, not 404)
+CSS_PATH=$(curl -s http://localhost:3000 | grep -o '/_next/static/css/[^"]*\.css' | head -1)
+curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000${CSS_PATH}"
+# Expected: 200  (if 404, the static folder is missing)
+
+# Check a font file is served
+FONT_PATH=$(curl -s http://localhost:3000 | grep -o '/_next/static/media/[^"]*\.woff2' | head -1)
+curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000${FONT_PATH}"
+# Expected: 200
+```
+
+### What to Deploy
+
+Your deployment package should contain the **entire** `.next/standalone/` directory:
+
+```
+.next/standalone/
+├── server.js                    ← Node server entry point
+├── package.json
+├── .next/
+│   └── static/                  ← CSS + fonts + JS chunks (CRITICAL)
+│       ├── css/
+│       │   └── [hash].css       ← All Tailwind + custom styles
+│       ├── media/
+│       │   └── [hash].woff2     ← Hind Siliguri, Anek Bangla, Amiri fonts
+│       └── chunks/
+│           └── *.js             ← React + app code
+├── public/                      ← Images, icons (CRITICAL)
+│   └── images/
+│       ├── hero.png
+│       ├── madrasa.png
+│       └── ...
+└── node_modules/                ← Minimal deps (auto-included by standalone)
+```
+
+**Do NOT deploy only `server.js`.** Deploy the whole folder.
+
+### Quick Deploy Checklist
+
+- [ ] Ran `npm run build` (not just `npx next build`)
+- [ ] `.next/standalone/.next/static/css/` contains at least one `.css` file
+- [ ] `.next/standalone/.next/static/media/` contains `.woff2` font files
+- [ ] `.next/standalone/public/images/` contains the AI-generated images
+- [ ] Copied the **entire** `.next/standalone/` folder to the server
+- [ ] Started with `NODE_ENV=production node .next/standalone/server.js`
+- [ ] `curl http://localhost:3000` returns HTML with `/_next/static/css/*.css` references
+- [ ] Those CSS URLs return `200` (not `404`)
+
