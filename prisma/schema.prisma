@@ -148,3 +148,22 @@ model UploadedImage {
   @@index([createdAt])
   @@index([deletedAt]) // fast filter for active (deletedAt IS NULL)
 }
+
+/// সাইট-ওয়াইড সেটিংস — একটি singleton row (id = "singleton")
+/// ফোন, ইমেইল, ঠিকানা ও সোশ্যাল মিডিয়া লিংক এখানে থাকে।
+/// Phase 3 — admin থেকে সম্পাদনা করলে সাইটের footer + donate CTA-তে লাইভ দেখা যায়।
+model SiteSettings {
+  id         String   @id // always "singleton" — never auto-generated
+  phone      String?  // primary phone
+  altPhone   String?  // secondary phone
+  email      String?  // contact email
+  address    String?  // physical/mailing address
+  facebook   String?  // facebook page URL
+  youtube    String?  // youtube channel URL
+  instagram  String?  // instagram profile URL
+  twitter    String?  // twitter/x profile URL
+  whatsapp   String?  // whatsapp number or wa.me link
+  telegram   String?  // telegram channel URL
+  mapEmbed   String?  // google maps embed iframe src
+  updatedAt  DateTime @updatedAt
+}
