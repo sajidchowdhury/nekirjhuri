@@ -1,8 +1,27 @@
 import Link from "next/link";
-import { HeartHandshake, MessageCircle } from "lucide-react";
+import {
+  HeartHandshake,
+  MessageCircle,
+  Phone,
+  MessageSquareText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getOrCreateSettings } from "@/lib/settings";
 
-export function DonateCta() {
+export async function DonateCta() {
+  const settings = await getOrCreateSettings();
+
+  // Build contact actions from settings (only if available)
+  const hasPhone = !!settings.phone;
+  const hasWhatsapp = !!settings.whatsapp;
+
+  // Normalize WhatsApp: if it's just a number, convert to wa.me link
+  const whatsappUrl = settings.whatsapp
+    ? settings.whatsapp.startsWith("http")
+      ? settings.whatsapp
+      : `https://wa.me/${settings.whatsapp.replace(/[^\d]/g, "")}`
+    : null;
+
   return (
     <section className="relative py-16 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -41,6 +60,32 @@ export function DonateCta() {
                 ভাই-বোনের প্রয়োজন পূরণে আজই এগিয়ে আসুন — ছোট হলেও, নিয়তের
                 ইস্তিকলাসই মূল।
               </p>
+
+              {/* Contact strip (only if settings have phone or whatsapp) */}
+              {(hasPhone || whatsappUrl) && (
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  {hasPhone && (
+                    <a
+                      href={`tel:${settings.phone!.replace(/\s/g, "")}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-cream/10 border border-cream/20 px-4 py-2 text-sm text-cream hover:bg-cream/20 transition-colors"
+                    >
+                      <Phone className="h-4 w-4 text-gold" />
+                      {settings.phone}
+                    </a>
+                  )}
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-cream/10 border border-cream/20 px-4 py-2 text-sm text-cream hover:bg-cream/20 transition-colors"
+                    >
+                      <MessageSquareText className="h-4 w-4 text-gold" />
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">

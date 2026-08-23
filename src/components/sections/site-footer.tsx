@@ -1,5 +1,17 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Heart } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Heart,
+  Facebook,
+  Youtube,
+  Instagram,
+  Twitter,
+  MessageCircle,
+  Send,
+} from "lucide-react";
+import { getOrCreateSettings } from "@/lib/settings";
 
 const LINKS = [
   { href: "#concept", label: "কনসেপ্ট" },
@@ -10,7 +22,27 @@ const LINKS = [
   { href: "#how", label: "কিভাবে কাজ করে" },
 ];
 
-export function SiteFooter() {
+/** Social link config: field name → icon component. */
+const SOCIAL_LINKS = [
+  { key: "facebook", icon: Facebook, label: "Facebook" },
+  { key: "youtube", icon: Youtube, label: "YouTube" },
+  { key: "instagram", icon: Instagram, label: "Instagram" },
+  { key: "twitter", icon: Twitter, label: "Twitter" },
+  { key: "whatsapp", icon: MessageCircle, label: "WhatsApp" },
+  { key: "telegram", icon: Send, label: "Telegram" },
+] as const;
+
+export async function SiteFooter() {
+  const settings = await getOrCreateSettings();
+
+  // Build the list of active social links from settings
+  const activeSocials = SOCIAL_LINKS.filter(
+    (s) => settings[s.key as keyof typeof settings] as string | null
+  ).map((s) => ({
+    ...s,
+    url: settings[s.key as keyof typeof settings] as string,
+  }));
+
   return (
     <footer className="relative mt-auto bg-emerald-deep text-cream">
       {/* gold top border ornament */}
@@ -54,6 +86,24 @@ export function SiteFooter() {
               “আখিরাতে প্রোপার ওয়েতে ইমপ্যাক্ট ফেলতে হলে আমাদের দুনিয়াবি আসবাব
               ব্যবহার করতে হবে।”
             </p>
+
+            {/* Social links */}
+            {activeSocials.length > 0 && (
+              <div className="mt-5 flex items-center gap-2">
+                {activeSocials.map((s) => (
+                  <a
+                    key={s.key}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cream/10 text-cream/80 hover:bg-gold hover:text-emerald-deep transition-colors"
+                  >
+                    <s.icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* links */}
@@ -77,18 +127,39 @@ export function SiteFooter() {
           <div>
             <p className="font-display font-700 text-cream mb-4">যোগাযোগ</p>
             <ul className="space-y-3 text-sm text-cream/70">
-              <li className="flex items-start gap-2.5">
-                <Mail className="h-4 w-4 mt-0.5 text-gold shrink-0" />
-                <span>info@nekirjhuri.org</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Phone className="h-4 w-4 mt-0.5 text-gold shrink-0" />
-                <span>+৮৮০ ১XXX-XXXXXX</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 mt-0.5 text-gold shrink-0" />
-                <span>বাংলাদেশ</span>
-              </li>
+              {settings.email && (
+                <li className="flex items-start gap-2.5">
+                  <Mail className="h-4 w-4 mt-0.5 text-gold shrink-0" />
+                  <a
+                    href={`mailto:${settings.email}`}
+                    className="hover:text-gold transition-colors"
+                  >
+                    {settings.email}
+                  </a>
+                </li>
+              )}
+              {settings.phone && (
+                <li className="flex items-start gap-2.5">
+                  <Phone className="h-4 w-4 mt-0.5 text-gold shrink-0" />
+                  <a
+                    href={`tel:${settings.phone.replace(/\s/g, "")}`}
+                    className="hover:text-gold transition-colors"
+                  >
+                    {settings.phone}
+                  </a>
+                </li>
+              )}
+              {settings.address && (
+                <li className="flex items-start gap-2.5">
+                  <MapPin className="h-4 w-4 mt-0.5 text-gold shrink-0" />
+                  <span>{settings.address}</span>
+                </li>
+              )}
+              {!settings.email && !settings.phone && !settings.address && (
+                <li className="text-cream/40 italic text-xs">
+                  যোগাযোগ তথ্য এখনো সেট করা হয়নি।
+                </li>
+              )}
             </ul>
           </div>
         </div>
