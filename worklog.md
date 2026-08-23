@@ -30,3 +30,20 @@ Artifacts:
 - src/lib/types.ts (shared types + BDT/percent helpers + labels)
 - src/components/sections/{site-header,hero,concept,success-vision,policy,ummah-needs,developing-story,fixed-projects,modules-funnel,donate-cta,site-footer,section-heading}.tsx
 - public/images/{hero,madrasa,students,well,pattern}.png
+
+---
+Task ID: 2
+Agent: Z.ai Code (main)
+Task: (1) Remove the "আমাদের সফলতার সংজ্ঞা" section heading + 5 goal cards from SuccessVision, keeping ONLY the dua band ("হে আল্লাহ! আমাদের দোষগুলো লুকিয়ে দিন..."). (2) Answer whether the project is fully Laravel-based. (3) Write a deployment guide at upload/ChowdhuryBari_Deployment_Guide.md following the existing template's 26-section structure.
+
+Work Log:
+- Rewrote src/components/sections/success-vision.tsx: removed SectionHeading import, removed GOALS array + grid map, removed lucide icon imports. Kept only an enhanced dua band (centered Arabic "اللهم تقبل", gold ornament divider ۞, the Bengali dua, emerald gradient, corner ornaments, decorative rings).
+- Ran `bun run lint` — clean, no errors.
+- Agent Browser verification at /#success: VLM confirmed (a) single emerald card with dua, (b) Arabic text in gold, (c) Bengali dua readable, (d) 5 goal cards REMOVED, (e) section heading REMOVED. Success.
+- Clarified to user: project is NOT Laravel — it is Next.js 16 + Prisma (MySQL-portable). Prisma schema can switch provider sqlite→mysql for production.
+- Wrote upload/ChowdhuryBari_Deployment_Guide.md (701 lines) mirroring the existing Laravel template's 26 sections + 3 appendices, adapted for Next.js: runtime (Node 20+/Bun), MySQL DB creation, env vars, build/start commands (standalone output), PM2/systemd, Caddy/Nginx+Certbot SSL, Dockerfile, deploy.sh, smoke tests.
+
+Stage Summary:
+- SuccessVision now shows only the dua; site flow is Hero → Concept → Dua → Policy → Needs → Story → Fixed Projects → Modules → Donate CTA → Footer.
+- Deployment guide is server-ready and saved at /home/z/my-project/upload/ChowdhuryBari_Deployment_Guide.md.
+- Lint clean; dev server healthy on :3000; all API routes 200.
