@@ -114,14 +114,33 @@ model RevenueModule {
 /// অ্যাডমিন ইউজার — অ্যাডমিন প্যানেলে লগইন করতে পারে এমন ব্যক্তি
 /// role: super_admin (সবকিছু) | editor (শুধু কন্টেন্ট)
 model AdminUser {
-  id           String    @id @default(cuid())
-  email        String    @unique
+  id           String         @id @default(cuid())
+  email        String         @unique
   name         String
   passwordHash String
-  role         String    @default("super_admin") // super_admin | editor
-  isActive     Boolean   @default(true)
+  role         String         @default("super_admin") // super_admin | editor
+  isActive     Boolean        @default(true)
   lastLoginAt  DateTime?
-  projects     Project[] // stories authored by this admin (Phase 7)
+  projects     Project[]      // stories authored by this admin (Phase 7)
+  uploads      UploadedImage[] // images uploaded by this admin (Phase 2)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+/// আপলোড করা ছবি — মিডিয়া লাইব্রেরি ট্র্যাকিং (Phase 2)
+/// প্রতিটি আপলোড sharp দিয়ে webp-এ অপটিমাইজ করা হয়।
+model UploadedImage {
+  id           String    @id @default(cuid())
+  filename     String // original filename (for display)
+  path         String // public URL path, e.g. /uploads/2025/01/uuid.webp
+  mimetype     String // original MIME type (e.g. image/png) — file on disk is webp
+  size         Int // file size in bytes (after optimization)
+  width        Int // image width in pixels
+  height       Int // image height in pixels
+  uploadedById String?
+  uploadedBy   AdminUser? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+
+  @@index([uploadedById])
+  @@index([createdAt])
 }
