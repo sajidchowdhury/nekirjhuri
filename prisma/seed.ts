@@ -1,0 +1,281 @@
+import { db } from "../src/lib/db";
+
+async function main() {
+  console.log("🌱 Seeding নেকির ঝুড়ি database...");
+
+  // ---------- Ummah Needs ----------
+  const needs = [
+    {
+      title: "মাদরাসা ছাদ মেরামতের তহবিল",
+      summary: "ঝড়ে ক্ষতিগ্রস্ত ছাদ মেরামতে জরুরি অর্থ প্রয়োজন।",
+      description:
+        "সিলেটের একটি গ্রামীণ মাদরাসার টিনের ছাদ সাম্প্রতিক ঝড়ে ব্যাপকভাবে ক্ষতিগ্রস্ত হয়েছে। বর্ষায় বৃষ্টির পানি ঢুকে শিক্ষার্থীরা ক্লাস করতে পারছে না। ছাদ মেরামত ও নতুন টিন বসাতে অর্থ প্রয়োজন।",
+      category: "madrasa",
+      location: "সিলেট, বাংলাদেশ",
+      targetAmount: 100000,
+      raisedAmount: 38000,
+      image: "/images/madrasa.png",
+      urgency: "critical",
+      beneficiary: "৮০ জন ছাত্র",
+      status: "active",
+    },
+    {
+      title: "এক তালেবে ইলমের পড়াশোনার খরচ",
+      summary: "একজন গরিব ছাত্রের দ্বীনি শিক্ষার বছরের খরচ।",
+      description:
+        "একজন মেধাবী তালেবে ইলম, যার পরিবার তার পড়াশোনার খরচ বহন করতে অক্ষম। তার এক বছরের বোর্ডিং, বই ও ভরণপোষণের জন্য সাহায্য দরকার। আপনার একটি ছোট অবদান তাকে একজন আলেম হওয়ার পথে এগিয়ে দিতে পারে।",
+      category: "student",
+      location: "চট্টগ্রাম, বাংলাদেশ",
+      targetAmount: 24000,
+      raisedAmount: 19500,
+      image: "/images/students.png",
+      urgency: "high",
+      beneficiary: "১ জন ছাত্র",
+      status: "active",
+    },
+    {
+      title: "গরিব পরিবারের চিকিৎসা সহায়তা",
+      summary: "একজন রোগীর জরুরি অপারেশনের অর্থ সংগ্রহ।",
+      description:
+        "এক গরিব পরিবারের মা-এর জরুরি অস্ত্রোপচার প্রয়োজন। চিকিৎসকরা বলেছেন দেরি হলে পরিস্থিতি আরও খারাপ হবে। আপনার সাহায্য একটি জীবন বাঁচাতে পারে।",
+      category: "medical",
+      location: "ঢাকা, বাংলাদেশ",
+      targetAmount: 60000,
+      raisedAmount: 21000,
+      image: "/images/well.png",
+      urgency: "critical",
+      beneficiary: "১টি পরিবার",
+      status: "active",
+    },
+    {
+      title: "এতিম ছাত্রদের শীতবস্ত্র বিতরণ",
+      summary: "শীত আসছে — এতিম ছেলেমেয়েদের কম্বল ও গরম পোশাক।",
+      description:
+        "রাজশাহীর একটি এতিমখানার ৪৫ জন শিশুর জন্য শীতের কম্বল ও গরম পোশাক সংগ্রহ করা হচ্ছে। গত বছর কয়েকজন অসুস্থ হয়ে পড়েছিল। এবার আগেভাগে প্রস্তুতি নিতে চাই।",
+      category: "family",
+      location: "রাজশাহী, বাংলাদেশ",
+      targetAmount: 35000,
+      raisedAmount: 12000,
+      image: "/images/students.png",
+      urgency: "high",
+      beneficiary: "৪৫ জন এতিম শিশু",
+      status: "active",
+    },
+    {
+      title: "নতুন মক্তব নির্মাণ তহবিল",
+      summary: "একটি গ্রামে বিনা খরচে কুরআন শেখার মক্তব স্থাপন।",
+      description:
+        "ময়মনসিংহের একটি প্রত্যন্ত গ্রামে কোনো মক্তব নেই। শিশুরা বিনা খরচে কুরআন শিখতে পারে এমন একটি ছোট মক্তব নির্মাণের উদ্যোগ নেওয়া হয়েছে। জমি ইতিমধ্যে দান করা হয়েছে, এখন নির্মাণ তহবিল দরকার।",
+      category: "madrasa",
+      location: "ময়মনসিংহ, বাংলাদেশ",
+      targetAmount: 150000,
+      raisedAmount: 52000,
+      image: "/images/madrasa.png",
+      urgency: "normal",
+      beneficiary: "৫০+ শিশু",
+      status: "active",
+    },
+    {
+      title: "বন্যায় ক্ষতিগ্রস্তদের খাদ্য সহায়তা",
+      summary: "বন্যায় ঘরবাড়ি হারানো পরিবারের জরুরি খাদ্য।",
+      description:
+        "কুড়িগ্রামের চরাঞ্চলে বন্যায় শতাধিক পরিবার ঘরবাড়ি হারিয়েছে। তাদের জরুরি খাদ্য, পানীয় ও বাঁচার উপকরণ পৌঁছে দিতে তহবিল সংগ্রহ করা হচ্ছে।",
+      category: "emergency",
+      location: "কুড়িগ্রাম, বাংলাদেশ",
+      targetAmount: 80000,
+      raisedAmount: 64500,
+      image: "/images/well.png",
+      urgency: "critical",
+      beneficiary: "১২০টি পরিবার",
+      status: "active",
+    },
+  ];
+
+  for (const n of needs) {
+    await db.ummahNeed.create({ data: n });
+  }
+  console.log(`  ✓ ${needs.length} UmmahNeeds created`);
+
+  // ---------- Projects (Developing Story) ----------
+  const project1 = await db.project.create({
+    data: {
+      name: "নুরানি মাদরাসা নির্মাণ প্রকল্প",
+      slug: "nurani-madrasha-build",
+      description:
+        "কুমিল্লার একটি গ্রামে একটি পূর্ণাঙ্গ নুরানি মাদরাসা ভবন নির্মাণের প্রকল্প। বর্তমানে ভাড়া বাসায় পরিচালিত হচ্ছে, নিজস্ব ভবন হলে আরও শিক্ষার্থী ভর্তি করা সম্ভব হবে।",
+      location: "কুমিল্লা, বাংলাদেশ",
+      status: "ongoing",
+      targetAmount: 500000,
+      raisedAmount: 185000,
+      featuredImage: "/images/madrasa.png",
+      startDate: new Date("2024-09-01"),
+    },
+  });
+
+  await db.projectUpdate.createMany({
+    data: [
+      {
+        projectId: project1.id,
+        date: new Date("2024-09-15"),
+        title: "স্থান পরিদর্শন ও জমি নির্বাচন",
+        description:
+          "দলটি কুমিল্লার গ্রামটি পরিদর্শন করেছে। স্থানীয় এক দাতা ৩ শতাংশ জমি দান করেছেন। ভূমি রেকর্ড যাচাই শেষ। প্রাথমিক নকশা তৈরি হয়েছে।",
+        image: "/images/madrasa.png",
+        collectedAmount: 45000,
+        neededAmount: 500000,
+      },
+      {
+        projectId: project1.id,
+        date: new Date("2024-11-20"),
+        title: "ভিত্তি স্থাপন সম্পন্ন",
+        description:
+          "আপনাদের দোয়া ও অবদানে ভবনের ভিত্তি সম্পন্ন হয়েছে। ইট, বালু ও সিমেন্ট কেনা হয়েছে। পিলার বাঁধাই এর কাজ চলছে।",
+        image: "/images/students.png",
+        collectedAmount: 120000,
+        neededAmount: 380000,
+      },
+      {
+        projectId: project1.id,
+        date: new Date("2025-01-10"),
+        title: "নতুন বছরে দেয়াল নির্মাণ শুরু",
+        description:
+          "প্রথম তলার দেয়াল নির্মাণ শুরু হয়েছে। এখন পর্যন্ত ১,৮৫,০০০ টাকা সংগৃহীত। ছাদ ঢালাইয়ের জন্য আরও তহবিল প্রয়োজন।",
+        image: "/images/well.png",
+        collectedAmount: 185000,
+        neededAmount: 315000,
+      },
+    ],
+  });
+
+  const project2 = await db.project.create({
+    data: {
+      name: "পানীয় পানির কুয়া খনন প্রকল্প",
+      slug: "water-well-project",
+      description:
+        "খুলনার উপকূলীয় অঞ্চলে লবণাক্ত পানির সমস্যা সমাধানে একটি গভীর নলকূপ স্থাপন। প্রায় ৩০০ পরিবার সুপেয় পানি পাবে।",
+      location: "খুলনা, বাংলাদেশ",
+      status: "ongoing",
+      targetAmount: 120000,
+      raisedAmount: 96000,
+      featuredImage: "/images/well.png",
+      startDate: new Date("2024-12-01"),
+    },
+  });
+
+  await db.projectUpdate.createMany({
+    data: [
+      {
+        projectId: project2.id,
+        date: new Date("2024-12-05"),
+        title: "প্রয়োজনীয়তা যাচাই ও স্থান নির্বাচন",
+        description:
+          "উপকূলীয় গ্রামটি পরিদর্শন করে দেখা গেছে লবণাক্ত পানির কারণে স্থানীয়রা ভুগছে। একটি উচ্চভূমি নলকূপের জন্য নির্বাচন করা হয়েছে।",
+        image: "/images/well.png",
+        collectedAmount: 30000,
+        neededAmount: 120000,
+      },
+      {
+        projectId: project2.id,
+        date: new Date("2025-01-18"),
+        title: "খনন কাজ শুরু — পানি পাওয়া গেছে",
+        description:
+          "১৮০ ফুট গভীরে মিষ্টি পানির স্তর পাওয়া গেছে! পাম্প ও পাইপ স্থাপনের কাজ চলছে। ৯৬,০০০ টাকা সংগৃহীত, শেষ ধাপের জন্য আর সামান্য প্রয়োজন।",
+        image: "/images/madrasa.png",
+        collectedAmount: 96000,
+        neededAmount: 24000,
+      },
+    ],
+  });
+  console.log("  ✓ 2 Projects with updates created");
+
+  // ---------- Fixed Projects ----------
+  const fixedProjects = [
+    {
+      name: "দারুল উলূম মাদরাসা",
+      type: "madrasha",
+      description:
+        "১২ বছর ধরে চলমান একটি দ্বীনি মাদরাসা, যেখানে ১৫০ জন ছাত্র বিনা খরচে পড়াশোনা করে। মাসিক ভাড়া, খাবার ও শিক্ষক বেতন নিয়মিত ব্যয়।",
+      location: "সিলেট, বাংলাদেশ",
+      beneficiaries: 150,
+      monthlyCost: 85000,
+      establishedAt: "২০১৩",
+      image: "/images/madrasa.png",
+      isActive: true,
+    },
+    {
+      name: "বায়তুল মুকাররম মক্তব",
+      type: "moktob",
+      description:
+        "গ্রামীণ ৬০ জন শিশুকে বিনা খরচে কুরআন ও প্রাথমিক দ্বীনি শিক্ষা দেওয়া হয়। একজন মুআল্লিমা ও একজন হাফিজ নিয়মিত পড়ান।",
+      location: "ময়মনসিংহ, বাংলাদেশ",
+      beneficiaries: 60,
+      monthlyCost: 22000,
+      establishedAt: "২০১৮",
+      image: "/images/students.png",
+      isActive: true,
+    },
+    {
+      name: "এতিম সদন — আশ্রয় ও শিক্ষা",
+      type: "orphanage",
+      description:
+        "৩৫ জন এতিম ও সুবিধাবঞ্চিত শিশুর আশ্রয়, খাবার, পোশাক ও শিক্ষার ব্যবস্থা। তাদের দুনিয়াবি ও দ্বীনি শিক্ষা একসাথে দেওয়া হয়।",
+      location: "রাজশাহী, বাংলাদেশ",
+      beneficiaries: 35,
+      monthlyCost: 60000,
+      establishedAt: "২০১৬",
+      image: "/images/students.png",
+      isActive: true,
+    },
+  ];
+  for (const f of fixedProjects) {
+    await db.fixedProject.create({ data: f });
+  }
+  console.log(`  ✓ ${fixedProjects.length} FixedProjects created`);
+
+  // ---------- Revenue Modules ----------
+  const modules = [
+    {
+      name: "ই-কমার্স ও দান-খাদা",
+      description: "হালাল পণ্য বিক্রি ও দানের মাধ্যমে রেভিনিউ জেনারেশন।",
+      icon: "shopping",
+      funnelPercent: 30,
+      order: 1,
+    },
+    {
+      name: "কনসালটেন্সি ও সার্ভিস",
+      description: "মেধা ভিত্তিক সেবা — ডিজাইন, ডেভেলপমেন্ট, মার্কেটিং।",
+      icon: "briefcase",
+      funnelPercent: 25,
+      order: 2,
+    },
+    {
+      name: "এজুকেশন প্ল্যাটফর্ম",
+      description: "অনলাইন দ্বীনি ও দুনিয়াবি শিক্ষা সেবা।",
+      icon: "book",
+      funnelPercent: 35,
+      order: 3,
+    },
+    {
+      name: "কৃষি ও ফার্ম",
+      description: "হালাল কৃষি উৎপাদন ও বিতরণ।",
+      icon: "leaf",
+      funnelPercent: 20,
+      order: 4,
+    },
+  ];
+  for (const m of modules) {
+    await db.revenueModule.create({ data: m });
+  }
+  console.log(`  ✓ ${modules.length} RevenueModules created`);
+
+  console.log("✅ Seeding complete!");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await db.$disconnect();
+  });

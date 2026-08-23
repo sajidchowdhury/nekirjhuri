@@ -1,0 +1,89 @@
+// Prisma schema for নেকির ঝুড়ি platform
+// Models: UmmahNeed (urgent needs), Project + ProjectUpdate (developing stories),
+//         FixedProject (running madrasa/maktab), Module (revenue modules -> funnel)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// উম্মাহর জরুরি প্রয়োজন — এককালীন (যেমন: মাদরাসার বেসিক চাহিদা, ছাত্রের পড়াশোনা)
+model UmmahNeed {
+  id            String   @id @default(cuid())
+  title         String
+  summary       String
+  description   String
+  category      String   @default("general") // madrasa | student | medical | family | emergency
+  location      String?
+  targetAmount  Int
+  raisedAmount  Int      @default(0)
+  image         String?
+  urgency       String   @default("normal") // critical | high | normal
+  beneficiary   String?
+  status        String   @default("active") // active | funded | closed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// ডেভেলপিং স্টোরি — একটি প্রজেক্ট যা ধাপে ধাপে এগোচ্ছে (টাইমলাইন সহ)
+model Project {
+  id            String           @id @default(cuid())
+  name          String
+  slug          String           @unique
+  description   String
+  location      String?
+  status        String           @default("ongoing") // ongoing | completed | planning
+  targetAmount  Int
+  raisedAmount  Int              @default(0)
+  featuredImage String?
+  startDate     DateTime         @default(now())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  updates       ProjectUpdate[]
+}
+
+/// প্রজেক্টের টাইমলাইন এন্ট্রি — প্রতিটি আপডেট (ভিজিট, অগ্রগতি, চাহিদা)
+model ProjectUpdate {
+  id               String   @id @default(cuid())
+  projectId        String
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date             DateTime @default(now())
+  title            String
+  description      String
+  image            String?
+  collectedAmount  Int      @default(0)
+  neededAmount     Int      @default(0)
+  createdAt        DateTime @default(now())
+}
+
+/// স্থায়ী প্রজেক্ট — চলমান মাদরাসা / মক্তব / এতিমখানা
+model FixedProject {
+  id            String   @id @default(cuid())
+  name          String
+  type          String   @default("madrasha") // madrasha | moktob | orphanage | clinic | mosque
+  description   String
+  location      String?
+  beneficiaries Int      @default(0)
+  monthlyCost   Int      @default(0)
+  establishedAt String?
+  image         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// রেভিনিউ মডিউল — প্রতিটি মডিউল থেকে একটি শতাংশ নেকির ঝুড়ি ফানেলে যায়
+model RevenueModule {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  icon         String?
+  funnelPercent Int     @default(0)
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
