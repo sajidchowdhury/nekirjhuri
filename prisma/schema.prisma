@@ -87,3 +87,17 @@ model RevenueModule {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 }
+
+/// অ্যাডমিন ইউজার — অ্যাডমিন প্যানেলে লগইন করতে পারে এমন ব্যক্তি
+/// role: super_admin (সবকিছু) | editor (শুধু কন্টেন্ট)
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("super_admin") // super_admin | editor
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

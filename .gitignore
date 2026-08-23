@@ -62,3 +62,7 @@ worklog.md
 
 # Local notes
 local-notes*
+
+# Sandbox dev server infrastructure (runtime state, not source)
+.zscripts/dev.pid
+.zscripts/dev.log
