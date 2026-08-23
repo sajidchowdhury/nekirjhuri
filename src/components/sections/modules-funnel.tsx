@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   ShoppingBag,
   Briefcase,
   BookOpen,
   Leaf,
   ArrowDown,
+  ArrowRight,
   Sparkles,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,11 +96,22 @@ export function ModulesFunnel() {
                       <p className="text-xs text-foreground/65 line-clamp-1 mt-0.5">
                         {m.description}
                       </p>
-                      <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full progress-fill rounded-full"
-                          style={{ width: `${m.funnelPercent}%` }}
-                        />
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden flex-1">
+                          <div
+                            className="h-full progress-fill rounded-full"
+                            style={{ width: `${m.funnelPercent}%` }}
+                          />
+                        </div>
+                        {m.slug && (
+                          <Link
+                            href={`/modules/${m.slug}`}
+                            className="text-[11px] font-600 text-emerald-deep hover:text-gold-deep transition-colors whitespace-nowrap inline-flex items-center gap-0.5"
+                          >
+                            বিস্তারিত
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
