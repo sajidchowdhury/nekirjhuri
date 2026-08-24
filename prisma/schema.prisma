@@ -190,6 +190,8 @@ model SiteSettings {
   whatsapp   String?  // whatsapp number or wa.me link
   telegram   String?  // telegram channel URL
   mapEmbed   String?  // google maps embed iframe src
+  logo       String?  // site logo image path (/uploads/...)
+  navItems   String?  // JSON array of {label, href} for custom nav
   updatedAt  DateTime @updatedAt
 }
 

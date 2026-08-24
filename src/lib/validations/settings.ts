@@ -32,8 +32,39 @@ export const siteSettingsSchema = z.object({
   instagram: urlOptional("instagram"),
   twitter: urlOptional("twitter"),
   telegram: urlOptional("telegram"),
-  whatsapp: z.string().trim().optional().nullable(), // number or wa.me link
+  whatsapp: z.string().trim().optional().nullable(),
   mapEmbed: z.string().trim().optional().nullable(),
+  logo: z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .refine(
+      (v) => !v || v.startsWith("/uploads/") || v.startsWith("/images/"),
+      "লোগো /uploads/ বা /images/ দিয়ে শুরু হতে হবে"
+    ),
+  navItems: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => {
+      if (!v) return true;
+      try {
+        const parsed = JSON.parse(v);
+        return (
+          Array.isArray(parsed) &&
+          parsed.every(
+            (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof item.label === "string" &&
+              typeof item.href === "string"
+          )
+        );
+      } catch {
+        return false;
+      }
+    }, "navItems অবৈধ JSON — [{label, href}] ফরম্যাটে হতে হবে"),
 });
 
 /** Helper: optional string that must be a URL if non-empty. */

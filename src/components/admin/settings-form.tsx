@@ -15,13 +15,18 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  Plus,
+  Trash2,
+  Image as ImageIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { ImagePicker } from "@/components/admin/image-picker";
 
 /** The shape of the settings row returned by the API. */
 interface SiteSettings {
@@ -37,7 +42,14 @@ interface SiteSettings {
   whatsapp: string | null;
   telegram: string | null;
   mapEmbed: string | null;
+  logo: string | null;
+  navItems: string | null;
   updatedAt: string | null;
+}
+
+interface NavItem {
+  label: string;
+  href: string;
 }
 
 /** Form state — all strings (null becomes "" for inputs). */
@@ -55,6 +67,8 @@ const EMPTY_FORM: FormState = {
   whatsapp: "",
   telegram: "",
   mapEmbed: "",
+  logo: "",
+  navItems: "",
 };
 
 /**
@@ -70,6 +84,7 @@ const EMPTY_FORM: FormState = {
  */
 export function SettingsForm() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -96,7 +111,16 @@ export function SettingsForm() {
         whatsapp: data.whatsapp ?? "",
         telegram: data.telegram ?? "",
         mapEmbed: data.mapEmbed ?? "",
+        logo: data.logo ?? "",
+        navItems: data.navItems ?? "",
       });
+      // Parse navItems JSON
+      try {
+        const parsed = data.navItems ? JSON.parse(data.navItems) : [];
+        if (Array.isArray(parsed)) setNavItems(parsed);
+      } catch {
+        setNavItems([]);
+      }
       setUpdatedAt(data.updatedAt);
     } catch {
       setTopError("সেটিংস লোড করা যায়নি। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।");
@@ -130,10 +154,14 @@ export function SettingsForm() {
     setSaving(true);
 
     try {
+      const payload = {
+        ...form,
+        navItems: navItems.length > 0 ? JSON.stringify(navItems) : null,
+      };
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -321,6 +349,91 @@ export function SettingsForm() {
           />
           {errors.mapEmbed && (
             <p className="text-xs text-destructive">{errors.mapEmbed}</p>
+          )}
+        </div>
+      </FormSection>
+
+      {/* Logo Upload */}
+      <FormSection
+        title="সাইট লোগো"
+        description="ওয়েবসাইটের হেডারে দেখানোর জন্য লোগো আপলোড করুন। ছবি স্বয়ংক্রিয়ভাবে রিসাইজ হবে।"
+      >
+        <div className="space-y-3">
+          <ImagePicker
+            value={form.logo || null}
+            onChange={(p) => setField("logo", p)}
+            label="লোগো ছবি"
+            hint=" PNG/JPEG/WebP — স্বয়ংক্রিয়ভাবে WebP তে অপটিমাইজ হবে"
+          />
+          {form.logo && (
+            <div className="flex items-center gap-3 rounded-xl bg-emerald-soft/30 border border-emerald/20 p-3">
+              {form.logo && (
+                <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-border shrink-0">
+                  <Image src={form.logo} alt="Logo preview" fill sizes="40px" className="object-contain" />
+                </div>
+              )}
+              <span className="text-xs text-muted-foreground font-mono truncate">{form.logo}</span>
+            </div>
+          )}
+          {errors.logo && (
+            <p className="text-xs text-destructive">{errors.logo}</p>
+          )}
+        </div>
+      </FormSection>
+
+      {/* Navigation Menu Items */}
+      <FormSection
+        title="নেভিগেশন মেনু"
+        description="হেডারে দেখানোর জন্য কাস্টম মেনু আইটেম যোগ করুন। ফাঁকা থাকলা ডিফল্ট মেনু দেখাবে।"
+      >
+        <div className="space-y-2">
+          {navItems.map((item, index) => (
+            <div key={index} className="flex gap-2 items-start">
+              <Input
+                value={item.label}
+                onChange={(e) => {
+                  const next = [...navItems];
+                  next[index] = { ...item, label: e.target.value };
+                  setNavItems(next);
+                }}
+                placeholder="মেনু নাম (যেমন: কনসেপ্ট)"
+                className="w-40"
+              />
+              <Input
+                value={item.href}
+                onChange={(e) => {
+                  const next = [...navItems];
+                  next[index] = { ...item, href: e.target.value };
+                  setNavItems(next);
+                }}
+                placeholder="লিংক (যেমন: #concept বা /stories)"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-destructive hover:bg-destructive/10"
+                onClick={() => setNavItems(navItems.filter((_, i) => i !== index))}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setNavItems([...navItems, { label: "", href: "" }])}
+            className="mt-1"
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            মেনু আইটেম যোগ করুন
+          </Button>
+          {navItems.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              {navItems.length} টি মেনু আইটেম সেট করা হয়েছে
+            </p>
           )}
         </div>
       </FormSection>

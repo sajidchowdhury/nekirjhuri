@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 
-const NAV = [
+const DEFAULT_NAV = [
   { href: "#concept", label: "কনসেপ্ট" },
   { href: "#success", label: "সফলতা" },
   { href: "#needs", label: "উম্মাহর প্রয়োজন" },
@@ -21,9 +22,15 @@ const NAV = [
   { href: "#how", label: "কিভাবে কাজ করে" },
 ];
 
+interface SiteSettings {
+  logo: string | null;
+  navItems: string | null;
+}
+
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -31,6 +38,30 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/settings", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => setSettings(data))
+      .catch(() => {});
+  }, []);
+
+  // Parse nav items from settings, fall back to defaults
+  let nav = DEFAULT_NAV;
+  if (settings?.navItems) {
+    try {
+      const parsed = JSON.parse(settings.navItems);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        nav = parsed.filter(
+          (item: { label?: string; href?: string }) => item.label && item.href
+        );
+      }
+    } catch {
+      /* use defaults */
+    }
+  }
+
+  const logo = settings?.logo || null;
 
   // When not scrolled (over hero), use light/cream text for contrast
   // against the dark emerald hero. When scrolled, use dark text on light bg.
@@ -48,7 +79,13 @@ export function SiteHeader() {
         <div className="flex h-16 lg:h-20 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="#top" className="flex items-center gap-2.5 group">
-            <BasketMark onHero={onHero} />
+            {logo ? (
+              <div className="relative h-9 w-9 shrink-0">
+                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain" />
+              </div>
+            ) : (
+              <BasketMark onHero={onHero} />
+            )}
             <div className="leading-tight">
               <span
                 className={`font-display font-700 text-lg sm:text-xl tracking-tight transition-colors ${
@@ -69,7 +106,7 @@ export function SiteHeader() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -120,7 +157,13 @@ export function SiteHeader() {
                 <SheetTitle className="sr-only">নেভিগেশন</SheetTitle>
                 <div className="flex items-center justify-between mt-2 mb-6">
                   <div className="flex items-center gap-2">
+                  {logo ? (
+                    <div className="relative h-9 w-9 shrink-0">
+                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain" />
+                    </div>
+                  ) : (
                     <BasketMark onHero={false} />
+                  )}
                     <span className="font-display font-700 text-lg text-emerald-deep">
                       নেকির ঝুড়ি
                     </span>
@@ -132,7 +175,7 @@ export function SiteHeader() {
                   </SheetClose>
                 </div>
                 <nav className="flex flex-col gap-1">
-                  {NAV.map((item) => (
+                  {nav.map((item) => (
                     <SheetClose asChild key={item.href}>
                       <Link
                         href={item.href}
