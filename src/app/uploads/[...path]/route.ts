@@ -33,10 +33,10 @@ export async function GET(
 ) {
   const { path: segments } = await params;
 
-  // Security: prevent path traversal — only allow alphanumeric, hyphens,
-  // underscores, and forward slashes in the path segments.
+  // Security: prevent path traversal — allow alphanumeric, hyphens,
+  // underscores, dots (for file extensions like .webp), in path segments.
   const safeSegments = segments.every((s) =>
-    /^[a-zA-Z0-9\-_]+$/.test(s)
+    /^[a-zA-Z0-9\-_.]+$/.test(s)
   );
 
   if (!safeSegments) {

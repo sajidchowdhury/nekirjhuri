@@ -78,30 +78,14 @@ export function SiteHeader() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-20 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="#top" className="flex items-center gap-2.5 group">
+          <Link href="#top" className="flex items-center gap-2 group">
             {logo ? (
-              <div className="relative h-9 w-9 shrink-0">
-                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain" />
+              <div className="relative h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-lg overflow-hidden ring-1 ring-gold/20">
+                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="44px" className="object-contain p-0.5" />
               </div>
             ) : (
               <BasketMark onHero={onHero} />
             )}
-            <div className="leading-tight">
-              <span
-                className={`font-display font-700 text-lg sm:text-xl tracking-tight transition-colors ${
-                  onHero ? "text-cream" : "text-emerald-deep"
-                }`}
-              >
-                নেকির ঝুড়ি
-              </span>
-              <span
-                className={`block text-[10px] sm:text-[11px] -mt-0.5 font-ar tracking-wide transition-colors ${
-                  onHero ? "text-gold-soft" : "text-muted-foreground"
-                }`}
-              >
-                بسم الله الرحمن الرحيم
-              </span>
-            </div>
           </Link>
 
           {/* Desktop nav */}
@@ -158,15 +142,12 @@ export function SiteHeader() {
                 <div className="flex items-center justify-between mt-2 mb-6">
                   <div className="flex items-center gap-2">
                   {logo ? (
-                    <div className="relative h-9 w-9 shrink-0">
-                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain" />
+                    <div className="relative h-9 w-9 shrink-0 rounded-lg overflow-hidden ring-1 ring-gold/20">
+                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain p-0.5" />
                     </div>
                   ) : (
                     <BasketMark onHero={false} />
                   )}
-                    <span className="font-display font-700 text-lg text-emerald-deep">
-                      নেকির ঝুড়ি
-                    </span>
                   </div>
                   <SheetClose asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">

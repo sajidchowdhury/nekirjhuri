@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Mail,
   Phone,
@@ -53,30 +54,28 @@ export async function SiteFooter() {
           {/* brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-gold-deep text-emerald-deep ring-1 ring-gold/40">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M3 9h18l-1.6 9.2A2 2 0 0 1 17.4 20H6.6a2 2 0 0 1-2-1.8L3 9Z" />
-                  <path d="M8 9V6a4 4 0 0 1 8 0v3" />
-                  <path d="M3 9h18" />
-                </svg>
-              </span>
-              <div>
-                <p className="font-display font-700 text-xl text-cream">
-                  নেকির ঝুড়ি
-                </p>
-                <p className="font-ar text-gold-soft text-sm">
-                  بسم الله الرحمن الرحيم
-                </p>
-              </div>
+              {settings.logo ? (
+                <div className="relative h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-cream/10 ring-1 ring-gold/30">
+                  <Image src={settings.logo} alt="নেকির ঝুড়ি" fill sizes="40px" className="object-contain p-1" />
+                </div>
+              ) : (
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-gold-deep text-emerald-deep ring-1 ring-gold/40">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M3 9h18l-1.6 9.2A2 2 0 0 1 17.4 20H6.6a2 2 0 0 1-2-1.8L3 9Z" />
+                    <path d="M8 9V6a4 4 0 0 1 8 0v3" />
+                    <path d="M3 9h18" />
+                  </svg>
+                </span>
+              )}
             </div>
             <p className="text-cream/70 text-sm leading-relaxed max-w-md">
               এই ফার্মের মালিক আল্লাহ তায়ালা — আমরা শুধু প্রতিনিধি। মেধা ও
