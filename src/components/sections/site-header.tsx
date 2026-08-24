@@ -77,15 +77,26 @@ export function SiteHeader() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-20 items-center justify-between gap-4">
-          {/* Logo */}
-          <Link href="#top" className="flex items-center gap-2 group shrink-0">
-            {logo ? (
-              <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl overflow-hidden bg-white shadow-md ring-2 ring-gold/40 group-hover:ring-gold/70 group-hover:scale-105 transition-all">
-                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="48px" className="object-contain p-1" />
-              </div>
-            ) : (
-              <BasketMark onHero={onHero} />
-            )}
+          {/* Logo — creative text logo */}
+          <Link href="#top" className="flex items-center gap-2.5 group shrink-0">
+            <BasketMark onHero={onHero} />
+            <div className="flex flex-col leading-none">
+              <span
+                className={`font-display font-800 text-lg sm:text-xl tracking-tight transition-colors ${
+                  onHero ? "text-cream" : "text-emerald-deep"
+                }`}
+                style={{ textShadow: onHero ? "0 2px 8px rgba(0,0,0,0.3)" : "none" }}
+              >
+                নেকির ঝুড়ি
+              </span>
+              <span
+                className={`text-[9px] sm:text-[10px] font-ar tracking-wider mt-0.5 transition-colors ${
+                  onHero ? "text-gold-soft" : "text-gold-deep"
+                }`}
+              >
+                بِسْمِ اللَّهِ
+              </span>
+            </div>
           </Link>
 
           {/* Desktop nav */}
@@ -141,13 +152,10 @@ export function SiteHeader() {
                 <SheetTitle className="sr-only">নেভিগেশন</SheetTitle>
                 <div className="flex items-center justify-between mt-2 mb-6">
                   <div className="flex items-center gap-2">
-                  {logo ? (
-                    <div className="relative h-10 w-10 shrink-0 rounded-xl overflow-hidden bg-white shadow-md ring-2 ring-gold/40">
-                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="40px" className="object-contain p-1" />
-                    </div>
-                  ) : (
                     <BasketMark onHero={false} />
-                  )}
+                    <span className="font-display font-800 text-lg text-emerald-deep">
+                      নেকির ঝুড়ি
+                    </span>
                   </div>
                   <SheetClose asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
