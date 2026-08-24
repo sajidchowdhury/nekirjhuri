@@ -1,35 +1,28 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { moduleCreateSchema } from "@/lib/validations/module";
 import { slugify, ensureUniqueSlug } from "@/lib/validations/slug";
 import { revalidateHome, revalidateModule } from "@/lib/revalidate";
+import { requireRole } from "@/lib/rbac";
+import { checkCSRF } from "@/lib/csrf";
+import { logAction, getClientIP } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
 /**
  * /api/admin/modules/[id]
  *
- * - GET: fetch a single module by id (auth-gated).
- * - PUT: update a module (auth-gated, zod-validated).
- * - DELETE: delete a module (auth-gated).
+ * - GET: fetch a single module by id (editor+).
+ * - PUT: update a module (super_admin, zod-validated).
+ * - DELETE: delete a module (super_admin).
  */
-
-async function requireAuth() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return null;
-  return session;
-}
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireAuth();
-  if (!session) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { error } = await requireRole("editor");
+  if (error) return error;
 
   const { id } = await params;
   const revModule = await db.revenueModule.findUnique({ where: { id } });
@@ -48,10 +41,12 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireAuth();
-  if (!session) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { session, error } = await requireRole("super_admin");
+  if (error) return error;
+
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
 
   const { id } = await params;
 
@@ -138,13 +133,15 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireAuth();
-  if (!session) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { session, error } = await requireRole("super_admin");
+  if (error) return error;
+
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
 
   const { id } = await params;
 

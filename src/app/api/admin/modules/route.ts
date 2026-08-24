@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { moduleCreateSchema } from "@/lib/validations/module";
 import { slugify, slugifyOrFallback, ensureUniqueSlug } from "@/lib/validations/slug";
 import { revalidateHome, revalidateModule } from "@/lib/revalidate";
+import { requireRole } from "@/lib/rbac";
+import { checkCSRF } from "@/lib/csrf";
+import { logAction, getClientIP } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,12 @@ export const dynamic = "force-dynamic";
  * Errors: 401, 422 (validation), 409 (slug collision), 500.
  */
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { session, error } = await requireRole("super_admin");
+  if (error) return error;
+
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
 
   let body: unknown;
   try {
@@ -113,10 +116,8 @@ export async function POST(request: Request) {
  * Response (200): { modules: [...] }
  */
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { error } = await requireRole("editor");
+  if (error) return error;
 
   const modules = await db.revenueModule.findMany({
     orderBy: { order: "asc" },

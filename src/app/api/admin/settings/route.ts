@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getOrCreateSettings } from "@/lib/settings";
 import { siteSettingsSchema, SETTINGS_SINGLETON_ID } from "@/lib/validations/settings";
 import { revalidateHome } from "@/lib/revalidate";
 import { checkCSRF } from "@/lib/csrf";
 import { logAction, getClientIP } from "@/lib/audit";
+import { requireRole } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +21,8 @@ export const dynamic = "force-dynamic";
  * Errors: 401 — not authenticated
  */
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { session, error } = await requireRole("super_admin");
+  if (error) return error;
 
   const settings = await getOrCreateSettings();
   return NextResponse.json(settings);
@@ -47,10 +44,8 @@ export async function GET() {
  *   500 — unexpected server error
  */
 export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
-  }
+  const { session, error } = await requireRole("super_admin");
+  if (error) return error;
 
   // CSRF check
   const csrfError = checkCSRF(request);
