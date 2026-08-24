@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "seed": "bun run prisma/seed.ts",
-    "seed:admin": "bun run prisma/seed-admin.ts"
+    "seed:admin": "bun run prisma/seed-admin.ts",
+    "seed:production": "bun run prisma/seed-production.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
