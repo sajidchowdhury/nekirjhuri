@@ -75,7 +75,7 @@ export function FixedProjects() {
             এখনো কোনো স্থায়ী প্রজেক্ট নেই।
           </p>
         ) : (
-          <div className="mt-10 px-2">
+          <div className="mt-10 px-2 relative">
             <Carousel
               opts={{
                 align: "start",
@@ -93,19 +93,21 @@ export function FixedProjects() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              {projects.length > 3 && (
+              {projects.length > 1 && (
                 <>
-                  <CarouselPrevious className="hidden lg:flex -left-4 bg-emerald-deep text-cream hover:bg-emerald border-gold/30" />
-                  <CarouselNext className="hidden lg:flex -right-4 bg-emerald-deep text-cream hover:bg-emerald border-gold/30" />
+                  <CarouselPrevious className="hidden lg:flex -left-2 bg-emerald-deep text-cream hover:bg-emerald border-gold/30 shadow-lg" />
+                  <CarouselNext className="hidden lg:flex -right-2 bg-emerald-deep text-cream hover:bg-emerald border-gold/30 shadow-lg" />
                 </>
               )}
             </Carousel>
 
-            {/* Mobile swipe hint */}
+            {/* Creative scroll hint for all devices */}
             {projects.length > 1 && (
-              <p className="lg:hidden text-center text-xs text-muted-foreground mt-3">
-                ← সোয়াইপ করে আরও দেখুন →
-              </p>
+              <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground">
+                <ChevronLeft className="h-4 w-4 text-gold-deep" />
+                <span className="text-xs font-500">সোয়াইপ / তীর চিহ্ন দিয়ে আরও দেখুন</span>
+                <ChevronRight className="h-4 w-4 text-gold-deep" />
+              </div>
             )}
           </div>
         )}

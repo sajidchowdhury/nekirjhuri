@@ -74,7 +74,6 @@ export function ModulesFunnel() {
   const [loading, setLoading] = useState(true);
   const [scrollIndex, setScrollIndex] = useState(0);
   const [selectedModule, setSelectedModule] = useState<RevenueModule | null>(null);
-  const [showAlhamdulillah, setShowAlhamdulillah] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -110,9 +109,6 @@ export function ModulesFunnel() {
 
   const handleModuleClick = useCallback((m: RevenueModule) => {
     setSelectedModule(m);
-    // Trigger Alhamdulillah effect
-    setShowAlhamdulillah(true);
-    setTimeout(() => setShowAlhamdulillah(false), 3000);
   }, []);
 
   return (
@@ -122,22 +118,6 @@ export function ModulesFunnel() {
         aria-hidden
         className="absolute inset-0 z-0 islamic-pattern opacity-60"
       />
-
-      {/* Alhamdulillah overlay effect */}
-      {showAlhamdulillah && (
-        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-          <div className="animate-rise text-center">
-            <p className="font-ar text-5xl sm:text-7xl text-gold drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
-              ٱلْحَمْدُ لِلَّٰهِ
-            </p>
-            <div className="mt-4 flex justify-center gap-2">
-              {[...Array(5)].map((_, i) => (
-                <Flower key={i} delay={i * 0.15} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
@@ -430,38 +410,6 @@ function ModuleDetailModal({
         </div>
       </div>
     </div>
-  );
-}
-
-// ----------------------------------------------------------------
-// Flower animation component for Alhamdulillah effect
-// ----------------------------------------------------------------
-
-function Flower({ delay }: { delay: number }) {
-  return (
-    <svg
-      className="animate-rise"
-      style={{ animationDelay: `${delay}s`, width: 24, height: 24 }}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <g>
-        {[0, 72, 144, 216, 288].map((rot) => (
-          <ellipse
-            key={rot}
-            cx="12"
-            cy="6"
-            rx="3"
-            ry="5"
-            fill="oklch(0.74 0.135 82)"
-            opacity="0.8"
-            transform={`rotate(${rot} 12 12)`}
-          />
-        ))}
-        <circle cx="12" cy="12" r="3" fill="oklch(0.6 0.12 80)" />
-      </g>
-    </svg>
   );
 }
 

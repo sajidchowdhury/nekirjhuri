@@ -1,15 +1,66 @@
-import Link from "next/link";
-import { ShoppingBag, Briefcase, BookOpen, Leaf, ArrowDown } from "lucide-react";
-import { SectionHeading } from "./section-heading";
+"use client";
 
-const MODULES = [
-  { icon: ShoppingBag, name: "ই-কমার্স", pct: "৩০%" },
-  { icon: Briefcase, name: "কনসালটেন্সি", pct: "২৫%" },
-  { icon: BookOpen, name: "এজুকেশন", pct: "৩৫%" },
-  { icon: Leaf, name: "কৃষি ফার্ম", pct: "২০%" },
-];
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import {
+  ShoppingBag,
+  Briefcase,
+  BookOpen,
+  Leaf,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
+import { SectionHeading } from "./section-heading";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { RevenueModule } from "@/lib/types";
+
+const ICONS: Record<string, typeof ShoppingBag> = {
+  shopping: ShoppingBag,
+  briefcase: Briefcase,
+  book: BookOpen,
+  leaf: Leaf,
+};
+
+const VISIBLE_COUNT = 4;
+const SLIDE_COUNT = 2;
 
 export function Concept() {
+  const [modules, setModules] = useState<RevenueModule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [scrollIdx, setScrollIdx] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/modules", { cache: "no-store" });
+        const data = await res.json();
+        if (alive) setModules(data.modules ?? []);
+      } catch {
+        /* ignore */
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const canScrollLeft = scrollIdx > 0;
+  const canScrollRight = scrollIdx + VISIBLE_COUNT < modules.length;
+
+  const scrollLeft = useCallback(() => {
+    setScrollIdx((i) => Math.max(0, i - SLIDE_COUNT));
+  }, []);
+  const scrollRight = useCallback(() => {
+    setScrollIdx((i) => Math.min(modules.length - VISIBLE_COUNT, i + SLIDE_COUNT));
+  }, [modules.length]);
+
+  const visibleModules = modules.slice(scrollIdx, scrollIdx + VISIBLE_COUNT);
+
   return (
     <section id="concept" className="relative py-12 lg:py-16 star-field">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -24,35 +75,88 @@ export function Concept() {
           subtitle="আমাদের মেধা ও সময়কে পুঁজি করে, দুনিয়াবি আসবাবের উসিলায় আখিরাত ইমপ্রুভ করার এই মিশনকে সমন্বয় করার জন্য এই প্ল্যাটফর্ম। এটি আমাদের ফানেলের উপরের ভাগ — যা কবরের মতো অন্ধকার টানেল হয়ে আখিরাতে চলে যায়।"
         />
 
-        {/* Funnel diagram */}
         <div className="mt-14 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Visual */}
           <div className="order-2 lg:order-1">
             <div className="relative rounded-3xl bg-gradient-to-b from-emerald-soft/60 to-cream border border-gold/20 p-6 sm:p-8 emerald-glow">
-              {/* stage 1 — modules */}
-              <p className="text-xs font-600 uppercase tracking-wider text-emerald-deep/70 mb-3">
-                ১. দুনিয়াবি মডিউল
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {MODULES.map((m) => (
-                  <div
-                    key={m.name}
-                    className="flex items-center gap-2.5 rounded-xl bg-background/70 border border-border px-3 py-2.5"
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald/10 text-emerald-deep">
-                      <m.icon className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <div className="text-sm font-600 text-foreground truncate">
-                        {m.name}
-                      </div>
-                      <div className="text-[11px] text-gold-deep font-500">
-                        ফানেলে {m.pct}
-                      </div>
-                    </div>
+              {/* stage 1 — modules carousel */}
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-600 uppercase tracking-wider text-emerald-deep/70">
+                  ১. দুনিয়াবি মডিউল
+                </p>
+                {modules.length > VISIBLE_COUNT && (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={scrollLeft}
+                      disabled={!canScrollLeft}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card hover:border-gold/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="বাঁদিকে"
+                    >
+                      <ChevronLeft className="h-4 w-4 text-emerald-deep" />
+                    </button>
+                    <button
+                      onClick={scrollRight}
+                      disabled={!canScrollRight}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card hover:border-gold/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      aria-label="ডানদিকে"
+                    >
+                      <ChevronRight className="h-4 w-4 text-emerald-deep" />
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
+
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {Array.from({ length: VISIBLE_COUNT }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {visibleModules.map((m, i) => {
+                    const Icon = ICONS[m.icon ?? ""] ?? Sparkles;
+                    return (
+                      <div
+                        key={m.id}
+                        className="flex flex-col items-center gap-1.5 rounded-xl bg-background/70 border border-border px-2 py-3 hover:border-gold/40 transition-all animate-rise"
+                        style={{ animationDelay: `${i * 0.05}s` }}
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald/10 text-emerald-deep">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div className="text-xs font-600 text-foreground text-center truncate w-full">
+                          {m.name}
+                        </div>
+                        <div className="text-[10px] text-gold-deep font-500">
+                          ফানেল {m.funnelPercent}%
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* dots */}
+              {modules.length > VISIBLE_COUNT && (
+                <div className="flex justify-center gap-1.5 mt-3">
+                  {Array.from({
+                    length: Math.ceil(modules.length / SLIDE_COUNT) - 1,
+                  }).map((_, i) => {
+                    const isActive = Math.floor(scrollIdx / SLIDE_COUNT) === i;
+                    return (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all ${
+                          isActive
+                            ? "w-5 bg-emerald-deep"
+                            : "w-1.5 bg-muted-foreground/30"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
               {/* arrow */}
               <div className="flex justify-center my-3">
@@ -100,9 +204,10 @@ export function Concept() {
                 দুনিয়াবি আসবাব
               </h3>
               <p className="text-foreground/75 leading-relaxed">
-                “নেকির ঝুড়ি” পরিচালনার জন্য আমাদের কিছু মডিউল থাকবে। প্রতিটি
-                মডিউল আমাদেরকে রেভিনিউ জেনারেট করে দেবে। প্রতিটি মডিউল থেকে একটি
-                শতাংশ “নেকির ঝুড়ি” ফানেলে যাবে — এটাই আমাদের দুনিয়াবি আসবাব।
+                &ldquo;নেকির ঝুড়ি&rdquo; পরিচালনার জন্য আমাদের কিছু মডিউল থাকবে।
+                প্রতিটি মডিউল আমাদেরকে রেভিনিউ জেনারেট করে দেবে। প্রতিটি মডিউল থেকে
+                একটি শতাংশ &ldquo;নেকির ঝুড়ি&rdquo; ফানেলে যাবে — এটাই আমাদের
+                দুনিয়াবি আসবাব।
               </p>
             </div>
 
@@ -130,8 +235,8 @@ export function Concept() {
             </div>
 
             <p className="text-sm text-muted-foreground italic border-l-2 border-gold/50 pl-4">
-              “আখিরাতে প্রোপার ওয়েতে ইমপ্যাক্ট ফেলতে হলে আমাদের দুনিয়াবি আসবাব
-              ব্যবহার করতে হবে।”
+              &ldquo;আখিরাতে প্রোপার ওয়েতে ইমপ্যাক্ট ফেলতে হলে আমাদের দুনিয়াবি
+              আসবাব ব্যবহার করতে হবে।&rdquo;
             </p>
 
             <Link

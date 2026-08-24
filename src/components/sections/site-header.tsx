@@ -32,24 +32,36 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // When not scrolled (over hero), use light/cream text for contrast
+  // against the dark emerald hero. When scrolled, use dark text on light bg.
+  const onHero = !scrolled;
+
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/85 backdrop-blur-md border-b border-gold/25 shadow-sm"
-          : "bg-transparent"
+          ? "bg-background/90 backdrop-blur-md border-b border-gold/25 shadow-sm"
+          : "bg-gradient-to-b from-emerald-deep/40 to-transparent"
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-20 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="#top" className="flex items-center gap-2.5 group">
-            <BasketMark />
+            <BasketMark onHero={onHero} />
             <div className="leading-tight">
-              <span className="font-display font-700 text-lg sm:text-xl text-emerald-deep tracking-tight">
+              <span
+                className={`font-display font-700 text-lg sm:text-xl tracking-tight transition-colors ${
+                  onHero ? "text-cream" : "text-emerald-deep"
+                }`}
+              >
                 নেকির ঝুড়ি
               </span>
-              <span className="block text-[10px] sm:text-[11px] text-muted-foreground -mt-0.5 font-ar tracking-wide">
+              <span
+                className={`block text-[10px] sm:text-[11px] -mt-0.5 font-ar tracking-wide transition-colors ${
+                  onHero ? "text-gold-soft" : "text-muted-foreground"
+                }`}
+              >
                 بسم الله الرحمن الرحيم
               </span>
             </div>
@@ -61,7 +73,11 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-2 text-sm font-500 text-foreground/80 hover:text-emerald-deep hover:bg-emerald-soft/50 rounded-md transition-colors"
+                className={`px-3 py-2 text-sm font-500 rounded-md transition-all ${
+                  onHero
+                    ? "text-cream/90 hover:text-gold hover:bg-cream/10"
+                    : "text-foreground/80 hover:text-emerald-deep hover:bg-emerald-soft/50"
+                }`}
               >
                 {item.label}
               </Link>
@@ -72,7 +88,11 @@ export function SiteHeader() {
           <div className="flex items-center gap-2">
             <Button
               asChild
-              className="hidden sm:inline-flex bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full shadow-sm"
+              className={`hidden sm:inline-flex rounded-full shadow-sm transition-all ${
+                onHero
+                  ? "bg-gold hover:bg-gold-deep text-emerald-deep"
+                  : "bg-emerald-deep hover:bg-emerald text-primary-foreground"
+              }`}
             >
               <Link href="#needs">
                 <Heart className="h-4 w-4 mr-1.5" />
@@ -85,7 +105,9 @@ export function SiteHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden rounded-full"
+                  className={`lg:hidden rounded-full transition-colors ${
+                    onHero ? "text-cream hover:bg-cream/10" : "text-foreground hover:bg-muted"
+                  }`}
                   aria-label="মেনু"
                 >
                   <Menu className="h-5 w-5" />
@@ -98,7 +120,7 @@ export function SiteHeader() {
                 <SheetTitle className="sr-only">নেভিগেশন</SheetTitle>
                 <div className="flex items-center justify-between mt-2 mb-6">
                   <div className="flex items-center gap-2">
-                    <BasketMark />
+                    <BasketMark onHero={false} />
                     <span className="font-display font-700 text-lg text-emerald-deep">
                       নেকির ঝুড়ি
                     </span>
@@ -139,9 +161,15 @@ export function SiteHeader() {
   );
 }
 
-function BasketMark() {
+function BasketMark({ onHero }: { onHero: boolean }) {
   return (
-    <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-deep to-emerald text-primary-foreground shadow-sm ring-1 ring-gold/40">
+    <span
+      className={`relative inline-flex h-9 w-9 items-center justify-center rounded-xl shadow-sm transition-all ${
+        onHero
+          ? "bg-gradient-to-br from-gold to-gold-deep text-emerald-deep ring-1 ring-gold/50"
+          : "bg-gradient-to-br from-emerald-deep to-emerald text-primary-foreground ring-1 ring-gold/30"
+      }`}
+    >
       <svg
         viewBox="0 0 24 24"
         className="h-5 w-5"
@@ -157,7 +185,9 @@ function BasketMark() {
         <path d="M3 9h18" />
         <path d="M9 13v3M15 13v3M12 13v3" />
       </svg>
-      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-gold ring-2 ring-background" />
+      <span className={`absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${
+        onHero ? "bg-cream" : "bg-gold"
+      }`} />
     </span>
   );
 }
