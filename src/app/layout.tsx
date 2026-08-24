@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hind_Siliguri, Anek_Bangla, Amiri } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-bn",
@@ -56,7 +57,9 @@ export default function RootLayout({
       <body
         className={`${hindSiliguri.variable} ${anekBangla.variable} ${amiri.variable} antialiased bg-background text-foreground font-bn`}
       >
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
         <Toaster />
       </body>
     </html>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { Heart, MapPin, Users, AlertCircle, Loader2 } from "lucide-react";
+import { Heart, MapPin, Users, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,27 +27,23 @@ const FILTERS: { key: "all" | NeedCategory; label: string }[] = [
 ];
 
 export function UmmahNeeds() {
-  const [needs, setNeeds] = useState<UmmahNeed[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | NeedCategory>("all");
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/needs", { cache: "no-store" });
-        const data = await res.json();
-        if (alive) setNeeds(data.needs ?? []);
-      } catch {
-        /* ignore */
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+  // Live polling: refetch every 15s so donation progress updates automatically.
+  // When an admin records a donation, the public sees it within 15s — no
+  // manual refresh needed.
+  const { data, isLoading } = useQuery({
+    queryKey: ["needs"],
+    queryFn: async () => {
+      const res = await fetch("/api/needs", { cache: "no-store" });
+      const json = await res.json();
+      return json.needs as UmmahNeed[];
+    },
+    refetchInterval: 15 * 1000, // 15s live polling
+  });
+
+  const needs = data ?? [];
+  const loading = isLoading;
 
   const filtered = useMemo(
     () =>
@@ -199,6 +196,3 @@ function NeedCard({ need }: { need: UmmahNeed }) {
   );
 }
 
-export function NeedsLoading() {
-  return <Loader2 className="h-4 w-4 animate-spin" />;
-}

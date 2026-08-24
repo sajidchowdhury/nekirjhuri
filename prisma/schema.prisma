@@ -13,24 +13,49 @@ datasource db {
 
 /// উম্মাহর জরুরি প্রয়োজন — এককালীন (যেমন: মাদরাসার বেসিক চাহিদা, ছাত্রের পড়াশোনা)
 model UmmahNeed {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   title         String
-  slug          String? @unique // URL slug (nullable until Phase 5 populates it)
+  slug          String?     @unique
   summary       String
   description   String
-  category      String   @default("general") // madrasa | student | medical | family | emergency
+  category      String      @default("general")
   location      String?
   targetAmount  Int
-  raisedAmount  Int      @default(0)
+  raisedAmount  Int         @default(0)
   image         String?
-  urgency       String   @default("normal") // critical | high | normal
+  urgency       String      @default("normal")
   beneficiary   String?
-  status        String   @default("active") // active | funded | closed
-  bKashNumber   String? // bKash number shown on the detail page
-  bKashType     String   @default("personal") // personal | merchant
-  donorCount    Int      @default(0) // incremented per confirmed donation (Phase 6)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status        String      @default("active")
+  bKashNumber   String?
+  bKashType     String      @default("personal")
+  donorCount    Int         @default(0)
+  donations     Donation[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+/// ডোনেশন — একটি UmmahNeed-এর বিরুদ্ধে প্রাপ্ত অর্থ (Phase 6)
+/// status: pending (self-reported) | confirmed | rejected
+/// confirmed হলে raisedAmount + donorCount ট্রানজেকশনে আপডেট হয়।
+model Donation {
+  id            String    @id @default(cuid())
+  needId        String
+  need          UmmahNeed @relation(fields: [needId], references: [id], onDelete: Cascade)
+  donorName     String
+  donorPhone    String?
+  amount        Int
+  method        String    @default("bkash") // bkash | nagad | cash | bank
+  transactionId String?
+  status        String    @default("confirmed") // pending | confirmed | rejected
+  note          String?
+  receivedAt    DateTime  @default(now())
+  confirmedById String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([needId])
+  @@index([status])
+  @@index([receivedAt])
 }
 
 /// ডেভেলপিং স্টোরি — একটি প্রজেক্ট যা ধাপে ধাপে এগোচ্ছে (টাইমলাইন সহ)
