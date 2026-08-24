@@ -66,4 +66,4 @@ local-notes*
 
 # Sandbox dev server infrastructure (runtime state, not source)
 .zscripts/dev.pid
-.zscripts/dev.log
+.zscripts/dev.log/uploads/
