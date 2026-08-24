@@ -73,10 +73,16 @@ export interface FixedProject {
 export interface RevenueModule {
   id: string;
   name: string;
+  slug?: string | null;
   description: string;
+  howItWorks?: string | null;
   icon: string | null;
+  featuredImage?: string | null;
+  socialLinks?: string | null;
   funnelPercent: number;
   order: number;
+  status?: string;
+  createdAt?: string;
 }
 
 // ---------- Helpers ----------

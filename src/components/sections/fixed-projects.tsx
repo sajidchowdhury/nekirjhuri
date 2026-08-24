@@ -8,10 +8,19 @@ import {
   CalendarRange,
   Wallet,
   HeartHandshake,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 import { SectionHeading } from "./section-heading";
 import {
   formatBDT,
@@ -42,7 +51,7 @@ export function FixedProjects() {
   }, []);
 
   return (
-    <section id="projects" className="relative py-20 lg:py-28 bg-cream-deep/50">
+    <section id="projects" className="relative py-16 lg:py-20 bg-cream-deep/50 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="স্থায়ী প্রজেক্ট"
@@ -61,11 +70,43 @@ export function FixedProjects() {
               <Skeleton key={i} className="h-[360px] rounded-2xl" />
             ))}
           </div>
+        ) : projects.length === 0 ? (
+          <p className="mt-12 text-center text-muted-foreground">
+            এখনো কোনো স্থায়ী প্রজেক্ট নেই।
+          </p>
         ) : (
-          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {projects.map((p) => (
-              <FixedCard key={p.id} project={p} />
-            ))}
+          <div className="mt-10 px-2">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: projects.length > 3,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4">
+                {projects.map((p) => (
+                  <CarouselItem
+                    key={p.id}
+                    className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <FixedCard project={p} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {projects.length > 3 && (
+                <>
+                  <CarouselPrevious className="hidden lg:flex -left-4 bg-emerald-deep text-cream hover:bg-emerald border-gold/30" />
+                  <CarouselNext className="hidden lg:flex -right-4 bg-emerald-deep text-cream hover:bg-emerald border-gold/30" />
+                </>
+              )}
+            </Carousel>
+
+            {/* Mobile swipe hint */}
+            {projects.length > 1 && (
+              <p className="lg:hidden text-center text-xs text-muted-foreground mt-3">
+                ← সোয়াইপ করে আরও দেখুন →
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -75,7 +116,7 @@ export function FixedProjects() {
 
 function FixedCard({ project }: { project: FixedProject }) {
   return (
-    <article className="group flex flex-col rounded-2xl bg-card border border-border overflow-hidden hover:border-gold/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <article className="group flex flex-col h-full rounded-2xl bg-card border border-border overflow-hidden hover:border-gold/50 hover:shadow-xl transition-all duration-300">
       <div className="relative h-40 overflow-hidden">
         {project.image ? (
           <Image
