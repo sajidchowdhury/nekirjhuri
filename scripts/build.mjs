@@ -128,8 +128,14 @@ header("Verifying critical assets");
 const checks = [
   {
     label: "CSS files",
-    dir: join(STANDALONE_NEXT, "static", "css"),
-    test: (d) => existsSync(d) && readdirSync(d).some((f) => f.endsWith(".css")),
+    // Next.js 16 Turbopack puts CSS in chunks/ instead of css/
+    // Check both locations
+    dir: join(STANDALONE_NEXT, "static", "chunks"),
+    test: (d) =>
+      existsSync(d) &&
+      readdirSync(d).some((f) => f.endsWith(".css")) ||
+      (existsSync(join(STANDALONE_NEXT, "static", "css")) &&
+        readdirSync(join(STANDALONE_NEXT, "static", "css")).some((f) => f.endsWith(".css"))),
   },
   {
     label: "Font files",
@@ -153,8 +159,22 @@ const checks = [
 let allOk = true;
 for (const c of checks) {
   if (c.test(c.dir)) {
-    const count = readdirSync(c.dir).length;
-    log(`${c.label}: ${count} file(s)`);
+    // For CSS, count only .css files (chunks dir also has .js)
+    if (c.label === "CSS files") {
+      const chunksDir = join(STANDALONE_NEXT, "static", "chunks");
+      const cssDir = join(STANDALONE_NEXT, "static", "css");
+      let cssCount = 0;
+      if (existsSync(chunksDir)) {
+        cssCount += readdirSync(chunksDir).filter((f) => f.endsWith(".css")).length;
+      }
+      if (existsSync(cssDir)) {
+        cssCount += readdirSync(cssDir).filter((f) => f.endsWith(".css")).length;
+      }
+      log(`${c.label}: ${cssCount} file(s)`);
+    } else {
+      const count = readdirSync(c.dir).length;
+      log(`${c.label}: ${count} file(s)`);
+    }
   } else {
     err(`${c.label}: MISSING or empty at ${c.dir}`);
     allOk = false;

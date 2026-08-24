@@ -217,6 +217,25 @@ ZAI_API_KEY="your-zai-api-key"
 
 > If images are pre-generated and committed to `/public/images` (as in the current build), the AI key is **not** required for the site to run.
 
+### Admin Authentication (NextAuth.js) — REQUIRED
+
+```env
+# A strong random string used to sign JWTs. Generate one with:
+#   openssl rand -base64 32
+# NEVER reuse across environments.
+NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
+
+# The canonical URL of the deployed app (no trailing slash).
+NEXTAUTH_URL="https://nekirjhuri.org"
+
+# Email of the bootstrap super_admin created by `bun run seed:admin`.
+ADMIN_BOOTSTRAP_EMAIL="admin@nekirjhuri.org"
+```
+
+> Without `NEXTAUTH_SECRET`, the admin panel login will fail silently.
+> `NEXTAUTH_URL` must match your domain exactly (including https://).
+
+
 ### Mini-services (if used)
 
 ```env
@@ -249,12 +268,28 @@ npx prisma generate
 npm run build
 ```
 
-The `next.config.ts` is configured with `output: "standalone"`, which produces a self-contained server in `.next/standalone/` with only the needed `node_modules`. After build, copy the static + public assets:
+> The `bun run build` command runs `scripts/build.mjs`, which automates:
+> 1. `next build` (standalone output)
+> 2. Copy `.next/static/` → `.next/standalone/.next/static/` (CSS + fonts + JS)
+> 3. Copy `public/` → `.next/standalone/public/` (images)
+> 4. Verify CSS, font, JS chunk, and image files exist
+> 5. Print a summary with file counts and sizes
+>
+> **You must deploy the ENTIRE `.next/standalone/` folder**, not just `server.js`.
+
+### Seed the database (after first build)
 
 ```bash
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
+# Seed content (needs, projects, fixed projects, modules)
+bun run seed
+
+# Seed the bootstrap super_admin
+bun run seed:admin
+# → Login: admin@nekirjhuri.org / NekirJhuri@2025
+# → CHANGE THIS PASSWORD IMMEDIATELY after first login via /admin/users
 ```
+
+The `next.config.ts` is configured with `output: "standalone"`, which produces a self-contained server in `.next/standalone/` with only the needed `node_modules`. The `scripts/build.mjs` script handles copying the static + public assets automatically — you no longer need the manual `cp` commands.
 
 ---
 
@@ -509,7 +544,7 @@ Run as a non-root sudo user on a clean Ubuntu 22.04 / 24.04 VPS.
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git curl build-essential
 
-# 2. Node.js 20 LTS via NodeSource
+# 2. Node.js 20 LTS via NodeSource + PM2
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pm2
@@ -529,37 +564,49 @@ SQL
 # 5. Clone the repo
 sudo mkdir -p /var/www
 sudo chown $USER:$USER /var/www
-git clone https://github.com/<your-org>/nekir-jhuri.git /var/www/nekirjhuri
+git clone https://github.com/sajidchowdhury/nekirjhuri.git /var/www/nekirjhuri
 cd /var/www/nekirjhuri
 
 # 6. Switch Prisma to MySQL
 # Edit prisma/schema.prisma: provider = "mysql"
 
-# 7. Create .env
+# 7. Create .env (copy from .env.example)
 cp .env.example .env
-# Edit .env: set DATABASE_URL, NEXT_PUBLIC_SITE_URL
+# Edit .env — set ALL of these:
+#   DATABASE_URL="mysql://nekirjhuri:CHANGE_ME_STRONG@localhost:3306/nekirjhuri"
+#   NEXT_PUBLIC_SITE_URL="https://nekirjhuri.org"
+#   NEXTAUTH_SECRET="$(openssl rand -base64 32)"
+#   NEXTAUTH_URL="https://nekirjhuri.org"
+#   ADMIN_BOOTSTRAP_EMAIL="admin@nekirjhuri.org"
 
-# 8. Install + build
+# 8. Install + generate Prisma client + push schema
 npm ci
 npx prisma generate
 npx prisma db push
-npm run seed        # if a seed script exists: node prisma/seed.ts
-npm run build
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
 
-# 9. Run with PM2
+# 9. Seed content + bootstrap admin
+npm run seed           # needs, projects, fixed projects, modules
+npm run seed:admin     # creates super_admin (admin@nekirjhuri.org / NekirJhuri@2025)
+
+# 10. Build (scripts/build.mjs handles standalone + copy + verify)
+npm run build
+
+# 11. Run with PM2
 pm2 start "node .next/standalone/server.js" --name nekirjhuri --env production
 pm2 save
 pm2 startup
 
-# 10. Reverse proxy + SSL (Caddy shown — simplest)
+# 12. Reverse proxy + SSL (Caddy shown — simplest)
 sudo apt install -y caddy
 # Edit /etc/caddy/Caddyfile with the block from §20
 sudo systemctl restart caddy
 
-# 11. Set permissions
+# 13. Set permissions
 sudo chown -R www-data:www-data /var/www/nekirjhuri
+
+# 14. Verify: open https://nekirjhuri.org → site should render
+#     Open https://nekirjhuri.org/admin/login → login with bootstrap creds
+#     CHANGE the bootstrap password immediately via /admin/users
 ```
 
 ### Ongoing Production Processes
@@ -590,10 +637,8 @@ npx prisma generate
 echo "→ Applying schema changes…"
 npx prisma db push
 
-echo "→ Building…"
+echo "→ Building (scripts/build.mjs handles standalone + copy + verify)…"
 npm run build
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
 
 echo "→ Restarting app…"
 pm2 restart nekirjhuri --update-env
@@ -631,10 +676,22 @@ pm2 logs nekirjhuri --lines 50
 | `https://nekirjhuri.org/#needs` | Donation needs section with cards + category filters |
 | `https://nekirjhuri.org/#story` | Developing story timeline with project switcher |
 | `https://nekirjhuri.org/#projects` | Fixed running projects (madrasa/maktab/orphanage) |
+| `https://nekirjhuri.org/stories` | 200 — blog index with story cards |
+| `https://nekirjhuri.org/stories/[slug]` | 200 — story detail with timeline + markdown |
+| `https://nekirjhuri.org/projects` | 200 — fixed projects index |
+| `https://nekirjhuri.org/projects/[slug]` | 200 — project detail with gallery carousel |
+| `https://nekirjhuri.org/modules/[slug]` | 200 — module detail with how-it-works + social links |
 | `https://nekirjhuri.org/api/needs` | JSON `{ "needs": [...] }` |
 | `https://nekirjhuri.org/api/projects` | JSON `{ "projects": [...] }` with updates |
 | `https://nekirjhuri.org/api/fixed-projects` | JSON `{ "projects": [...] }` |
 | `https://nekirjhuri.org/api/modules` | JSON `{ "modules": [...] }` |
+| `https://nekirjhuri.org/api/settings` | JSON with site contact + social info |
+| `https://nekirjhuri.org/admin/login` | 200 — login form renders (emerald gradient) |
+| `https://nekirjhuri.org/admin` | 307 → `/admin/login` (if not logged in) |
+| `https://nekirjhuri.org/admin` (after login) | 200 — dashboard with stats + charts |
+| `https://nekirjhuri.org/admin/needs` (after login) | 200 — needs list with filters |
+| `https://nekirjhuri.org/admin/donations` (after login) | 200 — donations list |
+| `https://nekirjhuri.org/admin/users` (super_admin) | 200 — user management |
 
 ---
 
@@ -657,24 +714,46 @@ Suitable for a small VPS (e.g. DigitalOcean $6 droplet, Hetzner CX22, Vultr $6 p
 ```
 nekir-jhuri/
 ├── prisma/
-│   ├── schema.prisma          # DB models (UmmahNeed, Project, ProjectUpdate, FixedProject, RevenueModule)
-│   └── seed.ts                # Seed data (6 needs, 2 projects, 3 fixed projects, 4 modules)
+│   ├── schema.prisma          # 10 models (UmmahNeed, Donation, Project, ProjectUpdate,
+│   │                          #   FixedProject, RevenueModule, AdminUser, UploadedImage,
+│   │                          #   SiteSettings, AuditLog)
+│   ├── seed.ts                # Content seed (needs, projects, modules)
+│   └── seed-admin.ts          # Bootstrap super_admin
+├── scripts/
+│   └── build.mjs              # Production build (standalone + copy + verify)
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx           # The single user-visible route (composes all sections)
-│   │   ├── layout.tsx         # Root layout (Bengali + Arabic fonts, metadata)
-│   │   ├── globals.css        # Islamic theme (emerald/gold/cream palette, patterns)
-│   │   └── api/
-│   │       ├── needs/route.ts
-│   │       ├── projects/route.ts
-│   │       ├── fixed-projects/route.ts
-│   │       └── modules/route.ts
-│   ├── components/sections/   # Header, Hero, Concept, SuccessVision, Policy, UmmahNeeds, DevelopingStory, FixedProjects, ModulesFunnel, DonateCta, SiteFooter
+│   │   ├── page.tsx           # Public single-page site
+│   │   ├── layout.tsx         # Root layout (fonts + QueryProvider)
+│   │   ├── admin/             # Admin panel (auth-guarded)
+│   │   │   ├── (dashboard)/   # All admin pages (layout + sidebar + topbar)
+│   │   │   └── login/         # Public login page
+│   │   ├── api/               # Public + admin APIs
+│   │   │   ├── needs, projects, fixed-projects, modules, settings, donations
+│   │   │   ├── auth/[...nextauth]
+│   │   │   └── admin/ (needs, modules, stories, fixed-projects, donations,
+│   │   │             settings, uploads, users, dashboard)
+│   │   ├── stories/           # Public blog (/stories, /stories/[slug])
+│   │   ├── projects/          # Public projects (/projects, /projects/[slug])
+│   │   └── modules/           # Public modules (/modules/[slug])
+│   ├── components/
+│   │   ├── sections/          # Public site sections (hero, concept, needs, etc.)
+│   │   ├── admin/             # Admin components (sidebar, forms, charts, ImagePicker)
+│   │   └── ui/                # shadcn/ui component library
 │   ├── lib/
-│   │   ├── db.ts              # Prisma client singleton
-│   │   └── types.ts           # Shared types + BDT/percent helpers
-│   └── components/ui/         # shadcn/ui component library
-├── public/images/             # AI-generated images (hero, madrasa, students, well, pattern)
+│   │   ├── db.ts, auth.ts     # Prisma client + NextAuth config
+│   │   ├── rbac.ts            # Role-based access control
+│   │   ├── audit.ts           # Audit logger
+│   │   ├── rate-limit.ts      # In-memory rate limiter
+│   │   ├── csrf.ts            # CSRF protection
+│   │   ├── password.ts        # Password policy + bcrypt cost
+│   │   ├── upload.ts          # Image upload service (sharp)
+│   │   ├── revalidate.ts      # Safe revalidation wrapper
+│   │   └── validations/       # Zod schemas (slug, pagination, settings, module,
+│   │                          #   need, donation, story, fixed-project, user)
+│   └── proxy.ts               # Next.js 16 auth guard (replaces middleware)
+├── public/images/             # AI-generated images
+├── scripts/build.mjs          # Production build automation
 ├── next.config.ts             # output: "standalone"
 ├── package.json
 └── .env.example
@@ -691,6 +770,11 @@ nekir-jhuri/
 | UI | React 19 + shadcn/ui + Tailwind CSS 4 + Lucide |
 | Fonts | next/font — Hind Siliguri, Anek Bangla, Amiri |
 | Database | Prisma 6 → MySQL (prod) / SQLite (dev) |
+| Auth | NextAuth.js v4 (JWT, Credentials, bcrypt) |
+| Charts | Recharts (dashboard analytics) |
+| Data Fetching | TanStack Query (live donation polling) |
+| Image Upload | sharp (webp optimization, 5MB max) |
+| Security | Audit log, rate limiting, CSRF, RBAC (super_admin/editor) |
 | AI (optional) | z-ai-web-dev-sdk (image generation / vision, server-side only) |
 | Process manager | PM2 or systemd |
 | Reverse proxy | Caddy (auto-SSL) or Nginx + Certbot |
@@ -819,7 +903,12 @@ Your deployment package should contain the **entire** `.next/standalone/` direct
 
 ### Quick Deploy Checklist
 
-- [ ] Ran `npm run build` (not just `npx next build`)
+- [ ] `.env` has `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `ADMIN_BOOTSTRAP_EMAIL` set
+- [ ] Prisma `provider = "mysql"` in `prisma/schema.prisma`
+- [ ] `npx prisma db push` ran clean
+- [ ] `npm run seed` ran (content data loaded)
+- [ ] `npm run seed:admin` ran (bootstrap super_admin created)
+- [ ] Ran `npm run build` (uses `scripts/build.mjs` — auto-copies static + public)
 - [ ] `.next/standalone/.next/static/css/` contains at least one `.css` file
 - [ ] `.next/standalone/.next/static/media/` contains `.woff2` font files
 - [ ] `.next/standalone/public/images/` contains the AI-generated images
@@ -827,4 +916,7 @@ Your deployment package should contain the **entire** `.next/standalone/` direct
 - [ ] Started with `NODE_ENV=production node .next/standalone/server.js`
 - [ ] `curl http://localhost:3000` returns HTML with `/_next/static/css/*.css` references
 - [ ] Those CSS URLs return `200` (not `404`)
+- [ ] `https://nekirjhuri.org/admin/login` renders the login form
+- [ ] Login with bootstrap creds → dashboard renders with stats + charts
+- [ ] **Changed the bootstrap password** via `/admin/users`
 

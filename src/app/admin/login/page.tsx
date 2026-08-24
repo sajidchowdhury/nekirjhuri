@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/components/admin/login-form";
 
 /**
@@ -59,7 +60,9 @@ export default function AdminLoginPage() {
 
         {/* Login card */}
         <div className="bg-card rounded-2xl shadow-xl border border-gold/20 p-6 sm:p-8">
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
         </div>
 
         {/* Footer note */}
