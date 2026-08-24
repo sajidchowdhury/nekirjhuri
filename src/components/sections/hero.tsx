@@ -114,7 +114,7 @@ export function Hero() {
 
           {/* mini stats */}
           <div
-            className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-xl animate-rise"
+            className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-xl animate-rise backdrop-blur-sm rounded-2xl bg-emerald-deep/30 border border-gold/20 p-4 sm:p-5"
             style={{ animationDelay: "0.4s" }}
           >
             {[
@@ -122,11 +122,11 @@ export function Hero() {
               { n: "২৪৫+", l: "উপকৃত মানুষ" },
               { n: "১০০%", l: "আমানতদার" },
             ].map((s) => (
-              <div key={s.l} className="border-l border-gold/30 pl-3 sm:pl-4">
-                <div className="font-display font-700 text-2xl sm:text-3xl text-gold">
+              <div key={s.l} className="border-l-2 border-gold/50 pl-3 sm:pl-4">
+                <div className="font-display font-800 text-2xl sm:text-3xl text-gold drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                   {s.n}
                 </div>
-                <div className="text-xs sm:text-sm text-cream/70 mt-0.5">
+                <div className="text-xs sm:text-sm text-cream font-500 mt-0.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                   {s.l}
                 </div>
               </div>

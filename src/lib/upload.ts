@@ -45,7 +45,7 @@ export class UploadError extends Error {
  * Pipeline:
  * 1. Validate the MIME type is in the allowlist (png/jpeg/webp).
  * 2. Validate the size is under MAX_UPLOAD_BYTES.
- * 3. Generate a path: public/uploads/<yyyy>/<mm>/<uuid>.webp
+ * 3. Generate a path: <upload-dir>/<yyyy>/<mm>/<uuid>.webp
  * 4. Optimize with sharp: resize to max 1600px wide, convert to webp q80.
  * 5. Write the optimized buffer to disk.
  * 6. Insert an UploadedImage row (with original mime for audit).
@@ -53,12 +53,10 @@ export class UploadError extends Error {
  *
  * @param file       The File/Blob from FormData.
  * @param userId     The AdminUser id of the uploader (null if unknown).
- * @param projectRoot  Absolute path to project root (default process.cwd()).
  */
 export async function saveUpload(
   file: File,
-  userId: string | null,
-  projectRoot: string = process.cwd()
+  userId: string | null
 ): Promise<SaveUploadResult> {
   // 1. Validate MIME
   const mime = file.type;
@@ -87,7 +85,7 @@ export async function saveUpload(
   // 4. Generate the storage path — always .webp since we optimize
   const date = new Date();
   const uuid = randomUUID();
-  const uploadPath = buildUploadPath("image/webp", projectRoot, date, uuid);
+  const uploadPath = buildUploadPath("image/webp", "", date, uuid);
 
   // 5. Optimize with sharp
   let optimizedBuffer: Buffer;

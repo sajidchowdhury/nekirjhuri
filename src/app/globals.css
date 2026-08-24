@@ -40,8 +40,13 @@
   --color-card: var(--card);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-gold-deep: var(--gold-deep);
+  --color-emerald: var(--emerald);
   --color-emerald-deep: var(--emerald-deep);
+  --color-emerald-soft: var(--emerald-soft);
   --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-ink: var(--ink);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -93,11 +98,6 @@
   --sidebar-accent-foreground: var(--emerald-deep);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--gold);
-
-  /* expose for custom utilities */
-  --gold: var(--gold);
-  --gold-soft: var(--gold-soft);
-  --cream: var(--cream);
 }
 
 .dark {

@@ -11,7 +11,7 @@ const MODULES = [
 
 export function Concept() {
   return (
-    <section id="concept" className="relative py-20 lg:py-28 star-field">
+    <section id="concept" className="relative py-12 lg:py-16 star-field">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="আমাদের কনসেপ্ট"
