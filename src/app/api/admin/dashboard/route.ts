@@ -8,17 +8,17 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/admin/dashboard
  *
- * Auth-gated. Returns aggregated stats for the admin dashboard:
- *   - Total raised (all-time + this month, confirmed donations only)
- *   - Donation count (total + this month)
- *   - Active needs count + total target vs raised
- *   - Pending donations count (awaiting confirmation)
- *   - Fixed projects count + total monthly cost + total beneficiaries
- *   - Revenue modules count + total funnel %
- *   - Published stories count
- *   - Recent donations (last 5, confirmed)
+ * Auth-gated. Returns aggregated stats + chart data for the admin dashboard.
  *
- * Response (200): { stats: {...}, recentDonations: [...] }
+ * Response (200): {
+ *   stats: {...},          // scalar aggregates (from 9.1)
+ *   recentDonations: [...], // last 5 confirmed
+ *   charts: {
+ *     donations30Days: [{ date, amount, count }],  // area chart
+ *     methodDistribution: [{ method, count, amount }],  // pie chart
+ *     needsProgress: [{ id, title, raised, target, pct }],  // bar chart
+ *   }
+ * }
  */
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -29,8 +29,10 @@ export async function GET() {
   // Date ranges
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29); // 30 days inclusive
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-  // Run all counts/sums in parallel for speed
   const [
     totalRaised,
     monthlyRaised,
@@ -45,64 +47,72 @@ export async function GET() {
     modulesAgg,
     publishedStories,
     recentDonations,
+    donationsLast30Days,
+    methodDistribution,
+    topNeeds,
   ] = await Promise.all([
-    // Total raised (confirmed only)
     db.donation.aggregate({
       where: { status: "confirmed" },
       _sum: { amount: true },
     }),
-    // Raised this month
     db.donation.aggregate({
-      where: {
-        status: "confirmed",
-        receivedAt: { gte: startOfMonth },
-      },
+      where: { status: "confirmed", receivedAt: { gte: startOfMonth } },
       _sum: { amount: true },
     }),
-    // Total donation count (confirmed)
     db.donation.count({ where: { status: "confirmed" } }),
-    // Donation count this month
     db.donation.count({
-      where: {
-        status: "confirmed",
-        receivedAt: { gte: startOfMonth },
-      },
+      where: { status: "confirmed", receivedAt: { gte: startOfMonth } },
     }),
-    // Pending donations
     db.donation.count({ where: { status: "pending" } }),
-    // Active needs count
     db.ummahNeed.count({ where: { status: "active" } }),
-    // Needs: sum of target + raised (active only)
     db.ummahNeed.aggregate({
       where: { status: "active" },
       _sum: { targetAmount: true, raisedAmount: true },
     }),
-    // Fixed projects count (active)
     db.fixedProject.count({ where: { isActive: true } }),
-    // Fixed projects: sum of monthlyCost + beneficiaries
     db.fixedProject.aggregate({
       where: { isActive: true },
       _sum: { monthlyCost: true, beneficiaries: true },
     }),
-    // Active revenue modules
-    db.revenueModule.count({
-      where: { isActive: true, status: "active" },
-    }),
-    // Modules: sum of funnelPercent
+    db.revenueModule.count({ where: { isActive: true, status: "active" } }),
     db.revenueModule.aggregate({
       where: { isActive: true, status: "active" },
       _sum: { funnelPercent: true },
     }),
-    // Published stories
     db.project.count({ where: { published: true } }),
-    // Recent donations (last 5 confirmed, with need title)
     db.donation.findMany({
       where: { status: "confirmed" },
       orderBy: { receivedAt: "desc" },
       take: 5,
-      include: {
-        need: { select: { title: true } },
+      include: { need: { select: { title: true } } },
+    }),
+    // Chart: donations over last 30 days (all confirmed in range)
+    db.donation.findMany({
+      where: {
+        status: "confirmed",
+        receivedAt: { gte: thirtyDaysAgo },
       },
+      select: { amount: true, receivedAt: true, method: true },
+      orderBy: { receivedAt: "asc" },
+    }),
+    // Chart: method distribution (all confirmed)
+    db.donation.groupBy({
+      by: ["method"],
+      where: { status: "confirmed" },
+      _count: true,
+      _sum: { amount: true },
+    }),
+    // Chart: top 8 active needs by raised amount (for bar chart)
+    db.ummahNeed.findMany({
+      where: { status: "active" },
+      select: {
+        id: true,
+        title: true,
+        raisedAmount: true,
+        targetAmount: true,
+      },
+      orderBy: { raisedAmount: "desc" },
+      take: 8,
     }),
   ]);
 
@@ -135,5 +145,75 @@ export async function GET() {
     },
   };
 
-  return NextResponse.json({ stats, recentDonations });
+  // Build 30-day donations array (fill missing days with 0)
+  const donations30Days = build30DayArray(donationsLast30Days, thirtyDaysAgo);
+
+  // Format method distribution for pie chart
+  const METHOD_LABELS: Record<string, string> = {
+    bkash: "বিকাশ",
+    nagad: "নগদ",
+    cash: "ক্যাশ",
+    bank: "ব্যাংক",
+  };
+  const methodChartData = methodDistribution.map((m) => ({
+    method: METHOD_LABELS[m.method] ?? m.method,
+    count: m._count,
+    amount: m._sum.amount ?? 0,
+  }));
+
+  // Format needs progress for bar chart
+  const needsProgress = topNeeds.map((n) => ({
+    id: n.id,
+    title: n.title.length > 20 ? n.title.slice(0, 20) + "…" : n.title,
+    raised: n.raisedAmount,
+    target: n.targetAmount,
+    pct: n.targetAmount > 0 ? Math.round((n.raisedAmount / n.targetAmount) * 100) : 0,
+  }));
+
+  return NextResponse.json({
+    stats,
+    recentDonations,
+    charts: {
+      donations30Days,
+      methodDistribution: methodChartData,
+      needsProgress,
+    },
+  });
+}
+
+/** Build a 30-element array of { date, amount, count } with no gaps. */
+function build30DayArray(
+  donations: { amount: number; receivedAt: Date; method: string }[],
+  startDate: Date
+) {
+  const days: { date: string; amount: number; count: number }[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Create a map of date-string → { amount, count }
+  const map = new Map<string, { amount: number; count: number }>();
+  for (const d of donations) {
+    const day = new Date(d.receivedAt);
+    day.setHours(0, 0, 0, 0);
+    const key = day.toISOString().split("T")[0];
+    const existing = map.get(key) ?? { amount: 0, count: 0 };
+    existing.amount += d.amount;
+    existing.count += 1;
+    map.set(key, existing);
+  }
+
+  // Iterate 30 days from startDate to today
+  const cursor = new Date(startDate);
+  while (cursor <= today) {
+    const key = cursor.toISOString().split("T")[0];
+    const data = map.get(key) ?? { amount: 0, count: 0 };
+    days.push({
+      date: cursor.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }),
+      amount: data.amount,
+      count: data.count,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return days;
 }

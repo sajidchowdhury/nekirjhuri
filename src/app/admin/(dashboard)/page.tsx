@@ -14,6 +14,9 @@ import {
 import { db } from "@/lib/db";
 import { formatBDT, percent } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { DonationsAreaChart } from "@/components/admin/charts/donations-area-chart";
+import { MethodPieChart } from "@/components/admin/charts/method-pie-chart";
+import { NeedsBarChart } from "@/components/admin/charts/needs-bar-chart";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +24,9 @@ export default async function AdminDashboardPage() {
   // Date ranges
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
 
   const [
     totalRaised,
@@ -36,6 +42,9 @@ export default async function AdminDashboardPage() {
     modulesAgg,
     publishedStories,
     recentDonations,
+    donationsLast30Days,
+    methodDistribution,
+    topNeeds,
   ] = await Promise.all([
     db.donation.aggregate({
       where: { status: "confirmed" },
@@ -72,6 +81,26 @@ export default async function AdminDashboardPage() {
       take: 5,
       include: { need: { select: { title: true } } },
     }),
+    // Chart: donations over last 30 days
+    db.donation.findMany({
+      where: { status: "confirmed", receivedAt: { gte: thirtyDaysAgo } },
+      select: { amount: true, receivedAt: true, method: true },
+      orderBy: { receivedAt: "asc" },
+    }),
+    // Chart: method distribution
+    db.donation.groupBy({
+      by: ["method"],
+      where: { status: "confirmed" },
+      _count: true,
+      _sum: { amount: true },
+    }),
+    // Chart: top 8 active needs by raised
+    db.ummahNeed.findMany({
+      where: { status: "active" },
+      select: { id: true, title: true, raisedAmount: true, targetAmount: true },
+      orderBy: { raisedAmount: "desc" },
+      take: 8,
+    }),
   ]);
 
   const totalRaisedAmount = totalRaised._sum.amount ?? 0;
@@ -82,6 +111,54 @@ export default async function AdminDashboardPage() {
   const fixedMonthly = fixedProjectsAgg._sum.monthlyCost ?? 0;
   const fixedBeneficiaries = fixedProjectsAgg._sum.beneficiaries ?? 0;
   const moduleFunnel = modulesAgg._sum.funnelPercent ?? 0;
+
+  // Build chart data
+  const METHOD_LABELS: Record<string, string> = {
+    bkash: "বিকাশ",
+    nagad: "নগদ",
+    cash: "ক্যাশ",
+    bank: "ব্যাংক",
+  };
+
+  // 30-day donations array (fill gaps with 0)
+  const donations30DaysMap = new Map<string, { amount: number; count: number }>();
+  for (const d of donationsLast30Days) {
+    const day = new Date(d.receivedAt);
+    day.setHours(0, 0, 0, 0);
+    const key = day.toISOString().split("T")[0];
+    const existing = donations30DaysMap.get(key) ?? { amount: 0, count: 0 };
+    existing.amount += d.amount;
+    existing.count += 1;
+    donations30DaysMap.set(key, existing);
+  }
+  const donations30Days: { date: string; amount: number; count: number }[] = [];
+  const cursor = new Date(thirtyDaysAgo);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  while (cursor <= today) {
+    const key = cursor.toISOString().split("T")[0];
+    const data = donations30DaysMap.get(key) ?? { amount: 0, count: 0 };
+    donations30Days.push({
+      date: cursor.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }),
+      amount: data.amount,
+      count: data.count,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  const methodChartData = methodDistribution.map((m) => ({
+    method: METHOD_LABELS[m.method] ?? m.method,
+    count: m._count,
+    amount: m._sum.amount ?? 0,
+  }));
+
+  const needsProgress = topNeeds.map((n) => ({
+    id: n.id,
+    title: n.title.length > 20 ? n.title.slice(0, 20) + "…" : n.title,
+    raised: n.raisedAmount,
+    target: n.targetAmount,
+    pct: n.targetAmount > 0 ? Math.round((n.raisedAmount / n.targetAmount) * 100) : 0,
+  }));
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto">
@@ -276,6 +353,20 @@ export default async function AdminDashboardPage() {
               ))}
             </ul>
           )}
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="mt-6">
+        <h2 className="font-display font-700 text-lg text-emerald-deep mb-4">
+          বিশ্লেষণ
+        </h2>
+        <div className="space-y-4">
+          <DonationsAreaChart data={donations30Days} />
+          <div className="grid lg:grid-cols-2 gap-4">
+            <MethodPieChart data={methodChartData} />
+            <NeedsBarChart data={needsProgress} />
+          </div>
         </div>
       </div>
 
