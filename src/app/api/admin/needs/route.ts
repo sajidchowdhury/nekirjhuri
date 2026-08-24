@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { needCreateSchema } from "@/lib/validations/need";
 import { slugify, slugifyOrFallback, ensureUniqueSlug } from "@/lib/validations/slug";
 import { revalidateHome } from "@/lib/revalidate";
+import { checkCSRF } from "@/lib/csrf";
+import { logAction, getClientIP } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,10 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
   }
+
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
 
   let body: unknown;
   try {
@@ -85,6 +91,17 @@ export async function POST(request: Request) {
     });
 
     await revalidateHome();
+
+    // Audit log
+    await logAction({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "create",
+      resource: "need",
+      resourceId: need.id,
+      ip: getClientIP(request),
+      details: JSON.stringify({ title: need.title, targetAmount: need.targetAmount }),
+    });
 
     return NextResponse.json(need, { status: 201 });
   } catch (err) {

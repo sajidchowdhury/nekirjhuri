@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { donationCreateSchema } from "@/lib/validations/donation";
 import { revalidateHome } from "@/lib/revalidate";
+import { checkCSRF } from "@/lib/csrf";
+import { logAction, getClientIP } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,10 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
   }
+
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
 
   let body: unknown;
   try {
@@ -104,6 +110,22 @@ export async function POST(request: Request) {
     });
 
     await revalidateHome();
+
+    // Audit log
+    await logAction({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "create",
+      resource: "donation",
+      resourceId: donation.id,
+      ip: getClientIP(request),
+      details: JSON.stringify({
+        needId: data.needId,
+        amount: data.amount,
+        method: data.method,
+        status: data.status,
+      }),
+    });
 
     return NextResponse.json(donation, { status: 201 });
   } catch (err) {

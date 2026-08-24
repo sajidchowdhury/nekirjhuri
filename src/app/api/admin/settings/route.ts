@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { getOrCreateSettings } from "@/lib/settings";
 import { siteSettingsSchema, SETTINGS_SINGLETON_ID } from "@/lib/validations/settings";
 import { revalidateHome } from "@/lib/revalidate";
+import { checkCSRF } from "@/lib/csrf";
+import { logAction, getClientIP } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +52,10 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "অননুমোদিত।" }, { status: 401 });
   }
 
+  // CSRF check
+  const csrfError = checkCSRF(request);
+  if (csrfError) return csrfError;
+
   // 1. Parse JSON body
   let body: unknown;
   try {
@@ -91,6 +97,16 @@ export async function PUT(request: Request) {
 
   // 5. Revalidate the public home page (footer + donate CTA read settings)
   await revalidateHome();
+
+  // 6. Audit log
+  await logAction({
+    userId: session.user.id,
+    userEmail: session.user.email,
+    action: "update",
+    resource: "settings",
+    resourceId: SETTINGS_SINGLETON_ID,
+    ip: getClientIP(request),
+  });
 
   return NextResponse.json(updated);
 }

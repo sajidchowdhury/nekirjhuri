@@ -15,6 +15,7 @@
  */
 import bcrypt from "bcryptjs";
 import { db } from "../src/lib/db";
+import { BCRYPT_COST, validatePassword } from "../src/lib/password";
 
 const DEFAULT_PASSWORD = "NekirJhuri@2025";
 
@@ -38,8 +39,16 @@ async function main() {
     return;
   }
 
-  // Hash the password (cost factor 12 — strong, ~250ms)
-  const passwordHash = await bcrypt.hash(password, 12);
+  // Validate password against policy
+  const validation = validatePassword(password);
+  if (!validation.valid) {
+    console.error("✗ Password does not meet policy:");
+    validation.errors.forEach((e) => console.error(`  - ${e}`));
+    process.exit(1);
+  }
+
+  // Hash the password (cost factor from password policy — strong)
+  const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
   const admin = await db.adminUser.create({
     data: {

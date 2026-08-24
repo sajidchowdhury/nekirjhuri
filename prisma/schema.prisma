@@ -192,3 +192,22 @@ model SiteSettings {
   mapEmbed   String?  // google maps embed iframe src
   updatedAt  DateTime @updatedAt
 }
+
+/// অডিট লগ — প্রতিটি admin mutation রেকর্ড করে (Phase 10)
+/// who কী করেছে, কোন resource-এ, কখন — security + compliance।
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  // AdminUser id (null if not authenticated)
+  userEmail String?  // email snapshot (in case user is deleted)
+  action    String   // create | update | delete | confirm | reject | login | login_failed
+  resource  String   // need | module | story | update | donation | fixed_project | settings | upload | user
+  resourceId String? // the id of the affected row
+  ip        String?  // request IP
+  details   String?  // JSON string with additional context (e.g. amount, old values)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource])
+  @@index([createdAt])
+  @@index([action])
+}

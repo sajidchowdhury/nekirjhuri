@@ -2,6 +2,9 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { checkLoginRateLimit } from "@/lib/rate-limit";
+import { logAction } from "@/lib/audit";
+import { BCRYPT_COST } from "@/lib/password";
 
 /**
  * NextAuth configuration for the নেকির ঝুড়ি admin panel.
@@ -38,17 +41,36 @@ export const authOptions: NextAuthOptions = {
         email: { label: "ইমেইল", type: "email" },
         password: { label: "পাসওয়ার্ড", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
+        // Rate limit: 5 attempts per 15 min per IP
+        const forwarded = req?.headers?.get?.("x-forwarded-for");
+        const ip = forwarded
+          ? forwarded.split(",")[0].trim()
+          : req?.headers?.get?.("x-real-ip")?.trim() ?? "unknown";
+        const rateLimitResult = checkLoginRateLimit(ip);
+        if (!rateLimitResult.allowed) {
+          return null; // silently reject — don't reveal rate limiting to attacker
+        }
+
+        const email = credentials.email.toLowerCase().trim();
+
         const user = await db.adminUser.findUnique({
-          where: { email: credentials.email.toLowerCase().trim() },
+          where: { email },
         });
 
         // No user found, or account deactivated
         if (!user || !user.isActive) {
+          await logAction({
+            userEmail: email,
+            action: "login_failed",
+            resource: "user",
+            ip,
+            details: JSON.stringify({ reason: "no_user_or_inactive" }),
+          });
           return null;
         }
 
@@ -58,18 +80,36 @@ export const authOptions: NextAuthOptions = {
           user.passwordHash
         );
         if (!valid) {
+          await logAction({
+            userId: user.id,
+            userEmail: user.email,
+            action: "login_failed",
+            resource: "user",
+            ip,
+            details: JSON.stringify({ reason: "wrong_password" }),
+          });
           return null;
         }
 
-        // Update last login timestamp (non-blocking — don't fail login on this)
+        // Update last login timestamp (non-blocking)
         db.adminUser
           .update({
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
           })
           .catch(() => {
-            /* ignore — login should still succeed */
+            /* ignore */
           });
+
+        // Audit: successful login
+        await logAction({
+          userId: user.id,
+          userEmail: user.email,
+          action: "login",
+          resource: "user",
+          resourceId: user.id,
+          ip,
+        });
 
         return {
           id: user.id,
