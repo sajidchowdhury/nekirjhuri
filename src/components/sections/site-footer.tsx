@@ -55,8 +55,8 @@ export async function SiteFooter() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               {settings.logo ? (
-                <div className="relative h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-cream/10 ring-1 ring-gold/30">
-                  <Image src={settings.logo} alt="নেকির ঝুড়ি" fill sizes="40px" className="object-contain p-1" />
+                <div className="relative h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-white shadow-md ring-2 ring-gold/40">
+                  <Image src={settings.logo} alt="নেকির ঝুড়ি" fill sizes="48px" className="object-contain p-1" />
                 </div>
               ) : (
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-gold-deep text-emerald-deep ring-1 ring-gold/40">

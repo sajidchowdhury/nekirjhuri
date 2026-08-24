@@ -78,10 +78,10 @@ export function SiteHeader() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 lg:h-20 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="#top" className="flex items-center gap-2 group">
+          <Link href="#top" className="flex items-center gap-2 group shrink-0">
             {logo ? (
-              <div className="relative h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-lg overflow-hidden ring-1 ring-gold/20">
-                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="44px" className="object-contain p-0.5" />
+              <div className="relative h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl overflow-hidden bg-white shadow-md ring-2 ring-gold/40 group-hover:ring-gold/70 group-hover:scale-105 transition-all">
+                <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="48px" className="object-contain p-1" />
               </div>
             ) : (
               <BasketMark onHero={onHero} />
@@ -142,8 +142,8 @@ export function SiteHeader() {
                 <div className="flex items-center justify-between mt-2 mb-6">
                   <div className="flex items-center gap-2">
                   {logo ? (
-                    <div className="relative h-9 w-9 shrink-0 rounded-lg overflow-hidden ring-1 ring-gold/20">
-                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="36px" className="object-contain p-0.5" />
+                    <div className="relative h-10 w-10 shrink-0 rounded-xl overflow-hidden bg-white shadow-md ring-2 ring-gold/40">
+                      <Image src={logo} alt="নেকির ঝুড়ি" fill sizes="40px" className="object-contain p-1" />
                     </div>
                   ) : (
                     <BasketMark onHero={false} />
