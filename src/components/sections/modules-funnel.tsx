@@ -21,7 +21,6 @@ import {
   Send,
   Globe,
   X,
-  Heart,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeading } from "./section-heading";
@@ -112,7 +111,7 @@ export function ModulesFunnel() {
   }, []);
 
   return (
-    <section id="how" className="relative py-16 lg:py-20 overflow-hidden">
+    <section id="solution" className="relative py-16 lg:py-20 overflow-hidden">
       {/* decorative arches */}
       <div
         aria-hidden
@@ -121,14 +120,14 @@ export function ModulesFunnel() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="কিভাবে কাজ করে"
+          eyebrow="সমাধান"
           title={
             <>
-              প্রতিটি মডিউল থেকে একটি অংশ{" "}
-              <span className="text-gradient-gold">ফানেলে যায়</span>
+              দুটি মডিউলে দুনিয়া ও{" "}
+              <span className="text-gradient-gold">আখিরাতের সেতু</span>
             </>
           }
-          subtitle="আমাদের প্রতিটি রেভিনিউ মডিউল লাভ জেনারেট করে, এবং সেখান থেকে একটি নির্দিষ্ট শতাংশ সরাসরি নেকির ঝুড়ি ফানেলে প্রবাহিত হয় — দুনিয়া থেকে আখিরাতে।"
+          subtitle="আপনার দুনিয়াবি দায়িত্ব আর আখিরাতের আকাঙ্ক্ষার সেতু বাঁধতে আমাদের দুটি মডিউল—রিজকুন ও মাদ্রাসাঅস। প্রতিটি মডিউল থেকে একটি নির্দিষ্ট অংশ সরাসরি নেকির ঝুড়ি ফানেলে প্রবাহিত হয়—দুনিয়া থেকে আখিরাতে।"
         />
 
         <div className="mt-10 grid lg:grid-cols-3 gap-6 items-stretch">

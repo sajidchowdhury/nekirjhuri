@@ -41,17 +41,17 @@ export function Hero() {
           <div className="flex items-center gap-2 mb-5 animate-rise" style={{ animationDelay: "0.05s" }}>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 border border-gold/30 px-3 py-1 text-xs sm:text-sm text-gold-soft font-500">
               <Sparkles className="h-3.5 w-3.5" />
-              আল্লাহর রাস্তায় একটি মিশন
+              দুনিয়ার উসিলায় আখিরাতের মিশন
             </span>
           </div>
 
           <h1
-            className="font-display font-800 text-5xl sm:text-6xl lg:text-7xl text-cream leading-[1.05] mb-6 animate-rise"
+            className="font-display font-800 text-4xl sm:text-5xl lg:text-6xl text-cream leading-[1.1] mb-6 animate-rise"
             style={{ animationDelay: "0.1s" }}
           >
-            নেকির{" "}
+            দুনিয়ার কেনাকাটা ও খেদমত,{" "}
             <span className="relative inline-block">
-              <span className="text-gradient-gold">ঝুড়ি</span>
+              <span className="text-gradient-gold">এবার হবে</span>
               <svg
                 className="absolute -bottom-2 left-0 w-full h-3 text-gold/60"
                 viewBox="0 0 200 12"
@@ -66,23 +66,18 @@ export function Hero() {
                   strokeLinecap="round"
                 />
               </svg>
-            </span>
+            </span>{" "}
+            আখিরাতের পুঁজি।
           </h1>
 
           <p
-            className="text-lg sm:text-xl text-cream/90 font-500 mb-3 animate-rise"
+            className="text-base sm:text-lg text-cream/85 leading-relaxed max-w-2xl mb-8 animate-rise"
             style={{ animationDelay: "0.18s" }}
           >
-            এই ফার্মের মালিক আল্লাহ তায়ালা — আমরা শুধু প্রতিনিধি।
-          </p>
-
-          <p
-            className="text-base sm:text-lg text-cream/75 leading-relaxed max-w-2xl mb-8 animate-rise"
-            style={{ animationDelay: "0.24s" }}
-          >
-            মেধা ও সময়কে পুঁজি করে, দুনিয়াবি উসিলায় আখিরাত ইমপ্রুভ করার মিশন।
-            আমাদের প্রতিটি মডিউল থেকে একটি অংশ এই ফানেলে পৌঁছায় — যা কবরের
-            অন্ধকার টানেল পার হয়ে আখিরাতে গিয়ে পৌঁছায়।
+            আপনার প্রতিদিনের ব্যস্ততা, পরিবারের দায়িত্ব আর প্রাতিষ্ঠানিক কাজগুলো
+            শুধু দুনিয়ার চাকা ঘোরায় না। &ldquo;নেকির ঝুড়ি&rdquo;-এর সাথে যুক্ত হয়ে
+            আপনার দৈনন্দিন প্রয়োজন মেটানোর মাধ্যমেই নির্মিত হোক আপনার আখিরাতের
+            বৃহৎ এক ঝুড়ি—যা অবিরাম সওয়াবের কারণ হয়ে থাকবে।
           </p>
 
           <div
@@ -94,9 +89,9 @@ export function Hero() {
               size="lg"
               className="bg-gold hover:bg-gold-deep text-emerald-deep font-600 rounded-full px-7 h-12 shadow-lg gold-glow"
             >
-              <Link href="#needs">
+              <Link href="#solution">
                 <Heart className="h-4.5 w-4.5 mr-2" />
-                উম্মাহর প্রয়োজন দেখুন
+                আমাদের মিশনে যুক্ত হোন
               </Link>
             </Button>
             <Button
@@ -118,9 +113,9 @@ export function Hero() {
             style={{ animationDelay: "0.4s" }}
           >
             {[
-              { n: "৩", l: "চলমান প্রজেক্ট" },
-              { n: "২৪৫+", l: "উপকৃত মানুষ" },
-              { n: "১০০%", l: "আমানতদার" },
+              { n: "২", l: "খেদমতের মডিউল" },
+              { n: "৫৫%", l: "ফানেলে যায়" },
+              { n: "১০০%", l: "নিয়তের ইখলাস" },
             ].map((s) => (
               <div key={s.l} className="border-l-2 border-gold/50 pl-3 sm:pl-4">
                 <div className="font-display font-800 text-2xl sm:text-3xl text-gold drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">

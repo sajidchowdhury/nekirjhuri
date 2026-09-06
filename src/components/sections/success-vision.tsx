@@ -58,6 +58,17 @@ export function SuccessVision() {
               “হে আল্লাহ! আমাদের দোষগুলো লুকিয়ে দিন, আমাদের ভালোবাসার রাসুল ﷺ-এর
               সামনে আমাদের সাদিক বলে পরিচয় করিয়ে দিন।”
             </p>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-cream/10 border border-gold/25 px-4 py-2 text-sm text-cream/90 backdrop-blur">
+                <span className="font-display font-700 text-gold">সাদিক</span>
+                হিসেবে পরিচিত হওয়ার আকাঙ্ক্ষা
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-cream/10 border border-gold/25 px-4 py-2 text-sm text-cream/90 backdrop-blur">
+                <span className="font-display font-700 text-gold">সদকায়ে জারিয়া</span>
+                হিসেবে গড়ে তোলার মিশন
+              </span>
+            </div>
           </div>
         </div>
       </div>

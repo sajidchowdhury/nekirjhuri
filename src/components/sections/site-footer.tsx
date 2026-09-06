@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
   Mail,
   Phone,
@@ -16,14 +15,13 @@ import { getOrCreateSettings } from "@/lib/settings";
 
 const LINKS = [
   { href: "#concept", label: "কনসেপ্ট" },
-  { href: "#success", label: "সফলতার সংজ্ঞা" },
-  { href: "#needs", label: "উম্মাহর প্রয়োজন" },
-  { href: "#story", label: "চলমান গল্প" },
-  { href: "#projects", label: "স্থায়ী প্রজেক্ট" },
-  { href: "#how", label: "কিভাবে কাজ করে" },
+  { href: "#problem", label: "সমস্যা" },
+  { href: "#solution", label: "সমাধান" },
+  { href: "#needs", label: "ফানেলের গন্তব্য" },
+  { href: "#story", label: "যাত্রা" },
+  { href: "#projects", label: "প্রতিষ্ঠান" },
 ];
 
-/** Social link config: field name → icon component. */
 const SOCIAL_LINKS = [
   { key: "facebook", icon: Facebook, label: "Facebook" },
   { key: "youtube", icon: Youtube, label: "YouTube" },
@@ -36,7 +34,6 @@ const SOCIAL_LINKS = [
 export async function SiteFooter() {
   const settings = await getOrCreateSettings();
 
-  // Build the list of active social links from settings
   const activeSocials = SOCIAL_LINKS.filter(
     (s) => settings[s.key as keyof typeof settings] as string | null
   ).map((s) => ({
@@ -80,12 +77,13 @@ export async function SiteFooter() {
               </div>
             </div>
             <p className="text-cream/70 text-sm leading-relaxed max-w-md">
-              এই ফার্মের মালিক আল্লাহ তায়ালা — আমরা শুধু প্রতিনিধি। মেধা ও
-              সময়কে পুঁজি করে, দুনিয়াবি উসিলায় আখিরাত ইমপ্রুভ করার মিশন।
+              এই ফার্মের মালিক আল্লাহ তায়ালা। আমরা শুধু প্রতিনিধি। আমাদের
+              পারফরম্যান্স নির্ভর করবে আমাদের নিয়তের ইখলাসের উপর।
             </p>
             <p className="mt-4 text-xs text-gold-soft/80 italic">
-              “আখিরাতে প্রোপার ওয়েতে ইমপ্যাক্ট ফেলতে হলে আমাদের দুনিয়াবি আসবাব
-              ব্যবহার করতে হবে।”
+              &ldquo;দুনিয়ার আসবাবকে কাজে লাগিয়ে ইলমের প্রতিষ্ঠানগুলোর খেদমত
+              করা এবং সেই খেদমতের মাধ্যমে আখিরাতের জন্য কিছু রেখে যাওয়া—এটাই
+              নেকির ঝুড়ি।&rdquo;
             </p>
 
             {/* Social links */}
@@ -167,9 +165,9 @@ export async function SiteFooter() {
 
         {/* bottom bar */}
         <div className="mt-12 pt-6 border-t border-cream/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/60">
-          <p>© {new Date().getFullYear()} নেকির ঝুড়ি। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>© {new Date().getFullYear()} নেকির ঝুড়ি। সর্বস্বত্ব আল্লাহর রহমতে।</p>
           <p className="flex items-center gap-1.5">
-            আল্লাহর রহমতে তৈরি
+            নিয়তের ইখলাসে তৈরি
             <Heart className="h-3.5 w-3.5 text-gold fill-gold" />
           </p>
         </div>

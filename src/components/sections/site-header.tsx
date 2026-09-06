@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,11 +14,11 @@ import {
 
 const DEFAULT_NAV = [
   { href: "#concept", label: "কনসেপ্ট" },
-  { href: "#success", label: "সফলতা" },
-  { href: "#needs", label: "উম্মাহর প্রয়োজন" },
-  { href: "#story", label: "চলমান গল্প" },
-  { href: "#projects", label: "স্থায়ী প্রজেক্ট" },
-  { href: "#how", label: "কিভাবে কাজ করে" },
+  { href: "#problem", label: "সমস্যা" },
+  { href: "#solution", label: "সমাধান" },
+  { href: "#needs", label: "ফানেলের গন্তব্য" },
+  { href: "#story", label: "যাত্রা" },
+  { href: "#projects", label: "প্রতিষ্ঠান" },
 ];
 
 interface SiteSettings {
@@ -46,7 +45,6 @@ export function SiteHeader() {
       .catch(() => {});
   }, []);
 
-  // Parse nav items from settings, fall back to defaults
   let nav = DEFAULT_NAV;
   if (settings?.navItems) {
     try {
@@ -61,10 +59,6 @@ export function SiteHeader() {
     }
   }
 
-  const logo = settings?.logo || null;
-
-  // When not scrolled (over hero), use light/cream text for contrast
-  // against the dark emerald hero. When scrolled, use dark text on light bg.
   const onHero = !scrolled;
 
   return (
@@ -126,9 +120,9 @@ export function SiteHeader() {
                   : "bg-emerald-deep hover:bg-emerald text-primary-foreground"
               }`}
             >
-              <Link href="#needs">
+              <Link href="#solution">
                 <Heart className="h-4 w-4 mr-1.5" />
-                অবদান রাখুন
+                মিশনে যুক্ত হোন
               </Link>
             </Button>
 
@@ -179,9 +173,9 @@ export function SiteHeader() {
                   asChild
                   className="mt-6 w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full"
                 >
-                  <Link href="#needs">
+                  <Link href="#solution">
                     <Heart className="h-4 w-4 mr-1.5" />
-                    অবদান রাখুন
+                    মিশনে যুক্ত হোন
                   </Link>
                 </Button>
               </SheetContent>
