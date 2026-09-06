@@ -114,7 +114,7 @@ export function Hero() {
           >
             {[
               { n: "২", l: "খেদমতের মডিউল" },
-              { n: "১০,০০০+", l: "আলেমের জানাজার লক্ষ্য" },
+              { n: "৫৫%", l: "ফানেলে যায়" },
               { n: "১০০%", l: "নিয়তের ইখলাস" },
             ].map((s) => (
               <div key={s.l} className="border-l-2 border-gold/50 pl-3 sm:pl-4">
