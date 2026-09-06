@@ -1,25 +1,86 @@
 import { db } from "../src/lib/db";
 
 /**
- * Seed script for নেকির ঝুড়ি content tables.
+ * Seed script for নেকির ঝুড়ি — content based on the new mission narrative
+ * (Rizqun & MadrashaOS as the two solution modules).
  *
  * Re-runnable: wipes UmmahNeed, Project, ProjectUpdate, FixedProject,
- * RevenueModule at the start (AdminUser is preserved — managed by seed-admin.ts).
- * Populates all Phase 0.3 fields (slugs, howItWorks, socialLinks, bKashNumber,
- * tags, body, gallery, etc.) so later phases have realistic data.
+ * RevenueModule, SiteSettings at the start.
  */
 async function main() {
-  console.log("🌱 Seeding নেকির ঝুড়ি database...");
+  console.log("🌱 Seeding নেকির ঝুড়ি database (new content)...");
 
-  // ---------- Clean content tables (preserve AdminUser) ----------
+  // ---------- Clean content tables ----------
   await db.projectUpdate.deleteMany();
   await db.project.deleteMany();
   await db.ummahNeed.deleteMany();
   await db.fixedProject.deleteMany();
   await db.revenueModule.deleteMany();
+  await db.siteSettings.deleteMany();
   console.log("  ✓ Cleaned content tables");
 
-  // ---------- Ummah Needs (with slug, bKash, donorCount) ----------
+  // ---------- SiteSettings (contact info) ----------
+  await db.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: {
+      id: "singleton",
+      phone: "01712-345678",
+      email: "salam@nekirjhuri.com",
+      address: "বাংলাদেশ",
+      facebook: "https://facebook.com/nekirjhuri",
+      whatsapp: "8801712345678",
+    },
+  });
+  console.log("  ✓ SiteSettings created");
+
+  // ---------- Revenue Modules: Rizqun & MadrashaOS ----------
+  const modules = [
+    {
+      name: "রিজকুন (Rizqun)",
+      slug: "rizqun",
+      description:
+        "আপনার দৈনন্দিন জীবনের নিরাপত্তা ও আরামের নিশ্চয়তা। শুধু একটি ডেলিভারি সার্ভিস নয়, এটি আপনার পরিবারের আমানতদার।",
+      howItWorks:
+        "## আমরা যা করি\nগ্রোসারি, মেডিসিন, সিসিটিভি ক্যামেরা, ইলেকট্রিক ও হোম সার্ভিস, এমনকি জরুরি প্রয়োজনে এম্বুলেন্স ও ব্লাড সাপোর্ট।\n\n## কীভাবে কাজ করে\nআপনি ঘরে বসে আমাদের হোয়াটসঅ্যাপে নক করুন বা ওয়েবসাইটে অর্ডার করুন। বাজারের ঠিক দামে আপনার দরকারি পণ্য নিরাপদে পৌঁছে যাবে আপনার হাতে।\n\n## নেকির ম্যাজিক\nআপনি রিজকুন থেকে যা কিনবেন, তার একটি নির্দিষ্ট পারসেন্টেজ সরাসরি নেকির ঝুড়ি ফানেলে চলে যাবে। অর্থাৎ, আপনার দৈনন্দিন কেনাকাটার সাথে সাথে আখিরাতের ঝুড়িও ভরে উঠছে সওয়াবে।",
+      icon: "shopping",
+      featuredImage: "/images/hero.png",
+      socialLinks: JSON.stringify([
+        { type: "whatsapp", url: "https://wa.me/8801712345678" },
+        { type: "facebook", url: "https://facebook.com/rizqun.shop" },
+        { type: "website", url: "https://nekirjhuri.com" },
+      ]),
+      funnelPercent: 30,
+      order: 1,
+      status: "active",
+      isActive: true,
+    },
+    {
+      name: "মাদ্রাসাঅস (MadrashaOS)",
+      slug: "madrashaos",
+      description:
+        "ইলমের প্রতিষ্ঠানের ডিজিটাল খেদমত। এটি শুধু একটি সফটওয়্যার নয়; এটি আপনার প্রতিষ্ঠানকে নেকির ঝুড়ির বৃহৎ মিশনের সাথে যুক্ত করার একটি উসিলা।",
+      howItWorks:
+        "## আমরা যা করি\nমাদরাসার ছাত্রদের তথ্য, ফি কালেকশন, হিসাব-নিকাশ এবং অন্যান্য প্রশাসনিক কাজ সহজ করতে 'ইলম কেয়ার' সফটওয়্যার ও আধুনিক ওয়েবসাইট তৈরি করে দেওয়া হয়।\n\n## কীভাবে কাজ করে\nআমরা কোনো ইনস্টলেশন ফি ছাড়াই মাত্র ৩০০ টাকা মাসিক সাবস্ক্রিপশনে এই আধুনিক সিস্টেমটি দিচ্ছি। কারণ আমাদের উদ্দেশ্য মুনাফা নয়, খেদমত।\n\n## নেকির ম্যাজিক\nমাদ্রাসাঅস-এর মাধ্যমে শুধু একটি প্রতিষ্ঠান ডিজিটাল হবে না, বরং সেই মাদরাসার ওস্তাদ ও তালেবে ইলমরা নেকির ঝুড়ির মূল কনসেপ্টের সাথে যুক্ত হবেন। এখান থেকেই শুরু হবে একটি পরিবার থেকে একটি সমাজের আত্মিক বিপ্লব।",
+      icon: "book",
+      featuredImage: "/images/madrasa.png",
+      socialLinks: JSON.stringify([
+        { type: "facebook", url: "https://facebook.com/madrashaos" },
+        { type: "youtube", url: "https://youtube.com/@nekirjhuri" },
+        { type: "website", url: "https://nekirjhuri.com" },
+      ]),
+      funnelPercent: 25,
+      order: 2,
+      status: "active",
+      isActive: true,
+    },
+  ];
+  for (const m of modules) {
+    await db.revenueModule.create({ data: m });
+  }
+  console.log(`  ✓ ${modules.length} RevenueModules created (Rizqun, MadrashaOS)`);
+
+  // ---------- Ummah Needs (where the funnel's output goes) ----------
   const needs = [
     {
       title: "মাদরাসা ছাদ মেরামতের তহবিল",
@@ -94,24 +155,6 @@ async function main() {
       donorCount: 5,
     },
     {
-      title: "নতুন মক্তব নির্মাণ তহবিল",
-      slug: "new-moktob-construction",
-      summary: "একটি গ্রামে বিনা খরচে কুরআন শেখার মক্তব স্থাপন।",
-      description:
-        "ময়মনসিংহের একটি প্রত্যন্ত গ্রামে কোনো মক্তব নেই। শিশুরা বিনা খরচে কুরআন শিখতে পারে এমন একটি ছোট মক্তব নির্মাণের উদ্যোগ নেওয়া হয়েছে। জমি ইতিমধ্যে দান করা হয়েছে, এখন নির্মাণ তহবিল দরকার।",
-      category: "madrasa",
-      location: "ময়মনসিংহ, বাংলাদেশ",
-      targetAmount: 150000,
-      raisedAmount: 52000,
-      image: "/images/madrasa.png",
-      urgency: "normal",
-      beneficiary: "৫০+ শিশু",
-      status: "active",
-      bKashNumber: "01623-456789",
-      bKashType: "personal",
-      donorCount: 11,
-    },
-    {
       title: "বন্যায় ক্ষতিগ্রস্তদের খাদ্য সহায়তা",
       slug: "flood-relief-food",
       summary: "বন্যায় ঘরবাড়ি হারানো পরিবারের জরুরি খাদ্য।",
@@ -136,19 +179,19 @@ async function main() {
   }
   console.log(`  ✓ ${needs.length} UmmahNeeds created`);
 
-  // ---------- Projects (Developing Story) with tags, published, featured ----------
+  // ---------- Projects (Developing Story — the mission journey) ----------
   const project1 = await db.project.create({
     data: {
-      name: "নুরানি মাদরাসা নির্মাণ প্রকল্প",
-      slug: "nurani-madrasha-build",
+      name: "নেকির ঝুড়ি মিশন — রিজকুন ও মাদ্রাসাঅস",
+      slug: "nekir-jhuri-mission",
       description:
-        "কুমিল্লার একটি গ্রামে একটি পূর্ণাঙ্গ নুরানি মাদরাসা ভবন নির্মাণের প্রকল্প। বর্তমানে ভাড়া বাসায় পরিচালিত হচ্ছে, নিজস্ব ভবন হলে আরও শিক্ষার্থী ভর্তি করা সম্ভব হবে।",
-      location: "কুমিল্লা, বাংলাদেশ",
+        "দুনিয়ার কেনাকাটা ও খেদমতকে আখিরাতের পুঁজিতে রূপান্তরের মিশন। রিজকুন ও মাদ্রাসাঅস—দুটি মডিউলের মাধ্যমে দুনিয়া ও আখিরাতের সেতু বাঁধার যাত্রা।",
+      location: "বাংলাদেশ",
       status: "ongoing",
       targetAmount: 500000,
       raisedAmount: 185000,
-      featuredImage: "/images/madrasa.png",
-      tags: "মাদরাসা,নির্মাণ,কুমিল্লা",
+      featuredImage: "/images/hero.png",
+      tags: "মিশন,রিজকুন,মাদ্রাসাঅস",
       published: true,
       featured: true,
       startDate: new Date("2024-09-01"),
@@ -160,11 +203,11 @@ async function main() {
       {
         projectId: project1.id,
         date: new Date("2024-09-15"),
-        title: "স্থান পরিদর্শন ও জমি নির্বাচন",
+        title: "কনসেপ্টের জন্ম — ছাতা ও ফানেল",
         description:
-          "দলটি কুমিল্লার গ্রামটি পরিদর্শন করেছে। স্থানীয় এক দাতা ৩ শতাংশ জমি দান করেছেন। ভূমি রেকর্ড যাচাই শেষ। প্রাথমিক নকশা তৈরি হয়েছে।",
-        body: "## পরিদর্শন রিপোর্ট\n\n১৫ সেপ্টেম্বর আমাদের দল কুমিল্লার গ্রামটি পরিদর্শন করে। স্থানীয় এক দাতা **৩ শতাংশ জমি** দান করেছেন।\n\n### যা সম্পন্ন হয়েছে\n- ভূমি রেকর্ড যাচাই\n- প্রাথমিক নকশা প্রস্তুত\n- স্থানীয় পরিষদের অনুমোদন\n\nআল্লাহর রহমতে কাজ শুরু হতে যাচ্ছে।",
-        image: "/images/madrasa.png",
+          "একটি সত্য থেকে শুরু—একদিন দুনিয়া ছাড়তে হবে, সাথে যাবে শুধু আমল। নেকির ঝুড়ি এমন একটি ছাতা, যার এক প্রান্ত দুনিয়ার আসবাব, অন্য প্রান্ত আখিরাত।",
+        body: "## কনসেপ্টের জন্ম\n\nএকটি সত্য থেকে শুরু—একদিন দুনিয়া ছাড়তে হবে। কবরের অন্ধকারে সাথে যাবে শুধু আমাদের আমল।\n\nনেকির ঝুড়ি এমন একটি **ছাতা বা ফানেল**, যার একপ্রান্ত যুক্ত দুনিয়ার দৈনন্দিন আসবাবের সাথে, আর অন্য প্রান্ত চলে গেছে কবরের অন্ধকার টানেল পেরিয়ে আখিরাতে।",
+        image: "/images/pattern.png",
         collectedAmount: 45000,
         neededAmount: 500000,
         published: true,
@@ -172,10 +215,10 @@ async function main() {
       {
         projectId: project1.id,
         date: new Date("2024-11-20"),
-        title: "ভিত্তি স্থাপন সম্পন্ন",
+        title: "রিজকুন — পরিবারের বিশ্বস্ত সঙ্গী চালু",
         description:
-          "আপনাদের দোয়া ও অবদানে ভবনের ভিত্তি সম্পন্ন হয়েছে। ইট, বালু ও সিমেন্ট কেনা হয়েছে। পিলার বাঁধাই এর কাজ চলছে।",
-        body: "## ভিত্তি সম্পন্ন 🤲\n\nআপনাদের দোয়া ও অবদানে ভবনের ভিত্তি সম্পন্ন হয়েছে।\n\n- ইট, বালু ও সিমেন্ট কেনা হয়েছে\n- পিলার বাঁধাইয়ের কাজ চলছে\n\nপরবর্তী ধাপ: দেয়াল নির্মাণ।",
+          "গ্রোসারি, মেডিসিন, সিসিটিভি, ইলেকট্রিক ও এম্বুলেন্স সাপোর্ট নিয়ে রিজকুন যাত্রা শুরু করেছে। প্রতিটি কেনাকাটা থেকে একটি অংশ ফানেলে যাচ্ছে।",
+        body: "## রিজকুন চালু 🛒\n\nরিজকুন—আপনার পরিবারের বিশ্বস্ত সঙ্গী—যাত্রা শুরু করেছে।\n\n- গ্রোসারি, মেডিসিন, সিসিটিভি\n- ইলেকট্রিক ও হোম সার্ভিস\n- জরুরি এম্বুলেন্স ও ব্লাড সাপোর্ট\n\n**নেকির ম্যাজিক:** প্রতিটি কেনাকাটা থেকে ৩০% ফানেলে যাচ্ছে।",
         image: "/images/students.png",
         collectedAmount: 120000,
         neededAmount: 380000,
@@ -184,11 +227,11 @@ async function main() {
       {
         projectId: project1.id,
         date: new Date("2025-01-10"),
-        title: "নতুন বছরে দেয়াল নির্মাণ শুরু",
+        title: "মাদ্রাসাঅস — প্রথম মাদরাসা ডিজিটাল হলো",
         description:
-          "প্রথম তলার দেয়াল নির্মাণ শুরু হয়েছে। এখন পর্যন্ত ১,৮৫,০০০ টাকা সংগৃহীত। ছাদ ঢালাইয়ের জন্য আরও তহবিল প্রয়োজন।",
-        body: "## দেয়াল নির্মাণ শুরু\n\nনতুন বছরে প্রথম তলার দেয়াল নির্মাণ শুরু হয়েছে।\n\n**সংগৃহীত:** ১,৮৫,০০০ টাকা\n**প্রয়োজন:** আরও ৩,১৫,০০০ টাকা (ছাদ ঢালাইয়ের জন্য)\n\nদোয়া করুন।",
-        image: "/images/well.png",
+          "ইলম কেয়ার সফটওয়্যার ও ওয়েবসাইট দিয়ে প্রথম মাদরাসা ডিজিটাল হয়েছে। কোনো ইনস্টলেশন ফি ছাড়াই মাত্র ৩০০ টাকা মাসিকে। ওস্তাদ ও তালেবে ইলমরা এখন মিশনের সাথে যুক্ত।",
+        body: "## প্রথম মাদরাসা ডিজিটাল 🕌\n\nমাদ্রাসাঅস-এর মাধ্যমে প্রথম মাদরাসা ডিজিটাল হলো।\n\n- 'ইলম কেয়ার' সফটওয়্যার ও ওয়েবসাইট\n- কোনো ইনস্টলেশন ফি নেই\n- মাত্র ৩০০ টাকা মাসিক\n\n**নেকির ম্যাজিক:** ওস্তাদ ও তালেবে ইলমরা এখন মূল কনসেপ্টের সাথে যুক্ত। এখান থেকেই শুরু একটি পরিবার থেকে সমাজের আত্মিক বিপ্লব।",
+        image: "/images/madrasa.png",
         collectedAmount: 185000,
         neededAmount: 315000,
         published: true,
@@ -201,7 +244,7 @@ async function main() {
       name: "পানীয় পানির কুয়া খনন প্রকল্প",
       slug: "water-well-project",
       description:
-        "খুলনার উপকূলীয় অঞ্চলে লবণাক্ত পানির সমস্যা সমাধানে একটি গভীর নলকূপ স্থাপন। প্রায় ৩০০ পরিবার সুপেয় পানি পাবে।",
+        "খুলনার উপকূলীয় অঞ্চলে লবণাক্ত পানির সমস্যা সমাধানে একটি গভীর নলকূপ স্থাপন। ফানেলের অর্থে প্রায় ৩০০ পরিবার সুপেয় পানি পাবে।",
       location: "খুলনা, বাংলাদেশ",
       status: "ongoing",
       targetAmount: 120000,
@@ -231,9 +274,9 @@ async function main() {
       {
         projectId: project2.id,
         date: new Date("2025-01-18"),
-        title: "খনন কাজ শুরু — পানি পাওয়া গেছে",
+        title: "খনন কাজ শুরু — মিষ্টি পানি পাওয়া গেছে",
         description:
-          "১৮০ ফুট গভীরে মিষ্টি পানির স্তর পাওয়া গেছে! পাম্প ও পাইপ স্থাপনের কাজ চলছে। ৯৬,০০০ টাকা সংগৃহীত, শেষ ধাপের জন্য আর সামান্য প্রয়োজন।",
+          "১৮০ ফুট গভীরে মিষ্টি পানির স্তর পাওয়া গেছে! পাম্প ও পাইপ স্থাপনের কাজ চলছে। ফানেলের অর্থে ৯৬,০০০ টাকা সংগৃহীত।",
         body: "## মিষ্টি পানি পাওয়া গেছে! 💧\n\n১৮০ ফুট গভীরে মিষ্টি পানির স্তর পাওয়া গেছে!\n\n- পাম্প ও পাইপ স্থাপনের কাজ চলছে\n- **সংগৃহীত:** ৯৬,০০০ টাকা\n- **প্রয়োজন:** আর মাত্র ২৪,০০০ টাকা\n\nআলহামদুলিল্লাহ, শেষ ধাপে পৌঁছে গেছি।",
         image: "/images/madrasa.png",
         collectedAmount: 96000,
@@ -244,14 +287,14 @@ async function main() {
   });
   console.log("  ✓ 2 Projects with updates created");
 
-  // ---------- Fixed Projects (with slug + gallery) ----------
+  // ---------- Fixed Projects (institutions on MadrashaOS) ----------
   const fixedProjects = [
     {
       name: "দারুল উলূম মাদরাসা",
       slug: "darul-uloom-madrasha",
       type: "madrasha",
       description:
-        "১২ বছর ধরে চলমান একটি দ্বীনি মাদরাসা, যেখানে ১৫০ জন ছাত্র বিনা খরচে পড়াশোনা করে। মাসিক ভাড়া, খাবার ও শিক্ষক বেতন নিয়মিত ব্যয়।",
+        "মাদ্রাসাঅসে যুক্ত প্রথম প্রতিষ্ঠান। ১২ বছর ধরে চলমান এই মাদরাসায় ১৫০ জন ছাত্র বিনা খরচে পড়াশোনা করে। এখন ইলম কেয়ার সফটওয়্যারে পরিচালিত।",
       location: "সিলেট, বাংলাদেশ",
       beneficiaries: 150,
       monthlyCost: 85000,
@@ -268,7 +311,7 @@ async function main() {
       slug: "baitul-mukarrum-moktob",
       type: "moktob",
       description:
-        "গ্রামীণ ৬০ জন শিশুকে বিনা খরচে কুরআন ও প্রাথমিক দ্বীনি শিক্ষা দেওয়া হয়। একজন মুআল্লিমা ও একজন হাফিজ নিয়মিত পড়ান।",
+        "মাদ্রাসাঅসে যুক্ত একটি গ্রামীণ মক্তব। ৬০ জন শিশুকে বিনা খরচে কুরআন ও প্রাথমিক দ্বীনি শিক্ষা দেওয়া হয়। ডিজিটাল ফি কালেকশন চালু।",
       location: "ময়মনসিংহ, বাংলাদেশ",
       beneficiaries: 60,
       monthlyCost: 22000,
@@ -282,7 +325,7 @@ async function main() {
       slug: "orphanage-education",
       type: "orphanage",
       description:
-        "৩৫ জন এতিম ও সুবিধাবঞ্চিত শিশুর আশ্রয়, খাবার, পোশাক ও শিক্ষার ব্যবস্থা। তাদের দুনিয়াবি ও দ্বীনি শিক্ষা একসাথে দেওয়া হয়।",
+        "নেকির ঝুড়ির সাপোর্টে পরিচালিত এতিমখানা। ৩৫ জন এতিম ও সুবিধাবঞ্চিত শিশুর আশ্রয়, খাবার, পোশাক ও দ্বীনি শিক্ষার ব্যবস্থা।",
       location: "রাজশাহী, বাংলাদেশ",
       beneficiaries: 35,
       monthlyCost: 60000,
@@ -300,81 +343,7 @@ async function main() {
   }
   console.log(`  ✓ ${fixedProjects.length} FixedProjects created`);
 
-  // ---------- Revenue Modules (with slug, howItWorks, socialLinks, featuredImage) ----------
-  const modules = [
-    {
-      name: "ই-কমার্স ও দান-খাদা",
-      slug: "ecommerce-daan",
-      description: "হালাল পণ্য বিক্রি ও দানের মাধ্যমে রেভিনিউ জেনারেশন।",
-      howItWorks:
-        "## কিভাবে কাজ করে\n\n১. হালাল পণ্য সোর্স করা হয়\n২. অনলাইনে বিক্রি হয়\n৩. লাভের ৩০% নেকির ঝুড়ি ফানেলে যায়\n৪. বাকি ৭০% পরবর্তী স্টক ও পরিচালনায় খরচ",
-      icon: "shopping",
-      featuredImage: "/images/madrasa.png",
-      socialLinks: JSON.stringify([
-        { type: "facebook", url: "https://facebook.com/nekirjhuri.shop" },
-        { type: "whatsapp", url: "https://wa.me/8801712345678" },
-      ]),
-      funnelPercent: 30,
-      order: 1,
-      status: "active",
-      isActive: true,
-    },
-    {
-      name: "কনসালটেন্সি ও সার্ভিস",
-      slug: "consultancy-service",
-      description: "মেধা ভিত্তিক সেবা — ডিজাইন, ডেভেলপমেন্ট, মার্কেটিং।",
-      howItWorks:
-        "## কিভাবে কাজ করে\n\n১. ক্লায়েন্টের প্রজেক্ট গ্রহণ\n২. দলের মেধা দিয়ে ডেলিভারি\n৩. লাভের ২৫% ফানেলে\n৪. বাকি ৭৫% দলের ভরণপোষণ ও টুলস",
-      icon: "briefcase",
-      featuredImage: "/images/students.png",
-      socialLinks: JSON.stringify([
-        { type: "linkedin", url: "https://linkedin.com/company/nekirjhuri" },
-      ]),
-      funnelPercent: 25,
-      order: 2,
-      status: "active",
-      isActive: true,
-    },
-    {
-      name: "এজুকেশন প্ল্যাটফর্ম",
-      slug: "education-platform",
-      description: "অনলাইন দ্বীনি ও দুনিয়াবি শিক্ষা সেবা।",
-      howItWorks:
-        "## কিভাবে কাজ করে\n\n১. কোর্স তৈরি ও প্রকাশ\n২. ছাত্র ভর্তি\n৩. টিউশন ফি থেকে ৩৫% ফানেলে\n৪. বাকি ৬৫% শিক্ষক ও প্ল্যাটফর্ম খরচ",
-      icon: "book",
-      featuredImage: "/images/students.png",
-      socialLinks: JSON.stringify([
-        { type: "youtube", url: "https://youtube.com/@nekirjhuri" },
-        { type: "facebook", url: "https://facebook.com/nekirjhuri.edu" },
-      ]),
-      funnelPercent: 35,
-      order: 3,
-      status: "active",
-      isActive: true,
-    },
-    {
-      name: "কৃষি ও ফার্ম",
-      slug: "agriculture-farm",
-      description: "হালাল কৃষি উৎপাদন ও বিতরণ।",
-      howItWorks:
-        "## কিভাবে কাজ করে\n\n১. জমিতে হালাল ফসল চাষ\n২. উৎপাদিত পণ্য বাজারজাত\n৩. লাভের ২০% ফানেলে\n৪. বাকি ৮০% পরবর্তী চাষ ও শ্রমিক",
-      icon: "leaf",
-      featuredImage: "/images/well.png",
-      socialLinks: JSON.stringify([
-        { type: "facebook", url: "https://facebook.com/nekirjhuri.farm" },
-      ]),
-      funnelPercent: 20,
-      order: 4,
-      status: "active",
-      isActive: true,
-    },
-  ];
-  for (const m of modules) {
-    await db.revenueModule.create({ data: m });
-  }
-  console.log(`  ✓ ${modules.length} RevenueModules created`);
-
-  console.log("✅ Seeding complete!");
+  console.log("✅ Seeding complete! (Rizqun & MadrashaOS content)");
 }
 
 main()

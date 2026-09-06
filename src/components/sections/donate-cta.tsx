@@ -1,9 +1,10 @@
 import Link from "next/link";
 import {
-  HeartHandshake,
-  MessageCircle,
+  ShoppingBag,
+  BookOpen,
   Phone,
   MessageSquareText,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOrCreateSettings } from "@/lib/settings";
@@ -11,11 +12,9 @@ import { getOrCreateSettings } from "@/lib/settings";
 export async function DonateCta() {
   const settings = await getOrCreateSettings();
 
-  // Build contact actions from settings (only if available)
   const hasPhone = !!settings.phone;
   const hasWhatsapp = !!settings.whatsapp;
 
-  // Normalize WhatsApp: if it's just a number, convert to wa.me link
   const whatsappUrl = settings.whatsapp
     ? settings.whatsapp.startsWith("http")
       ? settings.whatsapp
@@ -52,13 +51,14 @@ export async function DonateCta() {
                 وَمَا تُنفِقُوا مِنْ خَيْرٍ فَلِأَنفُسِكُمْ
               </p>
               <h2 className="font-display font-800 text-3xl sm:text-4xl lg:text-5xl text-cream leading-tight">
-                আপনার নেকির ঝুড়িতে{" "}
-                <span className="text-gradient-gold">অবদান রাখুন</span>
+                সিস্টেম ছাড়া সওয়াব কেবল{" "}
+                <span className="text-gradient-gold">আকাঙ্ক্ষা</span>
               </h2>
               <p className="mt-4 text-cream/80 leading-relaxed max-w-xl">
-                আপনি যা দান করবেন তা আপনার নিজের আখিরাতের পাথেয়। উম্মাহর একজন
-                ভাই-বোনের প্রয়োজন পূরণে আজই এগিয়ে আসুন — ছোট হলেও, নিয়তের
-                ইস্তিকলাসই মূল।
+                আসুন, সিস্টেম বানাই। আপনি হয়তো ভাবছেন, &ldquo;আমি তো একা,
+                কীভাবে বড় কোনো ভালো কাজ করব?&rdquo; নেকির ঝুড়ি এই একা থাকার
+                ভয় দূর করেছে—এখানে আপনি একটি বৃহৎ উম্মাহর মিশনের অংশীদার। আজই
+                আপনার দৈনন্দিন জীবনকে ইবাদতে রূপান্তর করুন।
               </p>
 
               {/* Contact strip (only if settings have phone or whatsapp) */}
@@ -94,9 +94,9 @@ export async function DonateCta() {
                 size="lg"
                 className="bg-gold hover:bg-gold-deep text-emerald-deep font-700 rounded-full px-7 h-13 py-3.5 gold-glow"
               >
-                <Link href="#needs">
-                  <HeartHandshake className="h-5 w-5 mr-2" />
-                  এখনই অবদান রাখুন
+                <Link href="#solution">
+                  <ShoppingBag className="h-5 w-5 mr-2" />
+                  রিজকুনে যুক্ত হোন
                 </Link>
               </Button>
               <Button
@@ -105,11 +105,15 @@ export async function DonateCta() {
                 variant="outline"
                 className="border-cream/30 text-cream hover:bg-cream/10 hover:text-cream rounded-full px-7 h-13 py-3.5 bg-transparent"
               >
-                <Link href="#story">
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  গল্প দেখুন
+                <Link href="#solution">
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  মাদ্রাসাঅস নিন
                 </Link>
               </Button>
+              <p className="flex items-center gap-1.5 text-xs text-cream/60 lg:text-right">
+                <Sparkles className="h-3.5 w-3.5 text-gold" />
+                আপনার প্রতিটি পদক্ষেপ যেন সাক্ষ্য দেয়—আমি ছিলাম একজন সাদিক।
+              </p>
             </div>
           </div>
         </div>

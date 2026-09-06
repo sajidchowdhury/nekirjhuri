@@ -54,14 +54,14 @@ export function FixedProjects() {
     <section id="projects" className="relative py-16 lg:py-20 bg-cream-deep/50 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="স্থায়ী প্রজেক্ট"
+          eyebrow="সেবাধীন প্রতিষ্ঠান"
           title={
             <>
-              যেসব প্রতিষ্ঠান{" "}
-              <span className="text-gradient-gold">নিয়মিত চলছে</span>
+              যেসব মাদরাসা{" "}
+              <span className="text-gradient-gold">মাদ্রাসাঅসে যুক্ত</span>
             </>
           }
-          subtitle="চলমান মাদরাসা, মক্তব ও এতিমখানা — যেগুলো আপনার নিয়মিত সাপোর্টে টিকে আছে এবং এগিয়ে যাচ্ছে।"
+          subtitle="মাদ্রাসাঅসের মাধ্যমে ডিজিটাল হওয়া প্রতিষ্ঠানগুলো—যেগুলো এখন নেকির ঝুড়ির মূল কনসেপ্টের সাথে যুক্ত। প্রতিটি প্রতিষ্ঠান থেকে শুরু হয় একটি পরিবার থেকে সমাজের আত্মিক বিপ্লব।"
         />
 
         {loading ? (
@@ -192,9 +192,11 @@ function FixedCard({ project }: { project: FixedProject }) {
         </div>
 
         <div className="mt-auto pt-4">
-          <Button className="w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full">
-            <HeartHandshake className="h-4 w-4 mr-1.5" />
-            নিয়মিত সাপোর্ট করুন
+          <Button asChild className="w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full">
+            <a href="#solution">
+              <HeartHandshake className="h-4 w-4 mr-1.5" />
+              সাপোর্ট করুন
+            </a>
           </Button>
         </div>
       </div>

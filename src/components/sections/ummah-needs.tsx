@@ -29,9 +29,6 @@ const FILTERS: { key: "all" | NeedCategory; label: string }[] = [
 export function UmmahNeeds() {
   const [filter, setFilter] = useState<"all" | NeedCategory>("all");
 
-  // Live polling: refetch every 15s so donation progress updates automatically.
-  // When an admin records a donation, the public sees it within 15s — no
-  // manual refresh needed.
   const { data, isLoading } = useQuery({
     queryKey: ["needs"],
     queryFn: async () => {
@@ -39,7 +36,7 @@ export function UmmahNeeds() {
       const json = await res.json();
       return json.needs as UmmahNeed[];
     },
-    refetchInterval: 15 * 1000, // 15s live polling
+    refetchInterval: 15 * 1000,
   });
 
   const needs = data ?? [];
@@ -55,14 +52,14 @@ export function UmmahNeeds() {
     <section id="needs" className="relative py-20 lg:py-28 bg-cream-deep/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="উম্মাহর প্রয়োজন"
+          eyebrow="ফানেলের গন্তব্য"
           title={
             <>
-              যাদের দিকে আল্লাহ{" "}
-              <span className="text-gradient-gold">তাকিয়ে আছেন</span>
+              আপনার কেনাকাটা থেকে যেখানে{" "}
+              <span className="text-gradient-gold">সওয়াব পৌঁছায়</span>
             </>
           }
-          subtitle="উম্মাহর ভাই-বোনদের জরুরি প্রয়োজন — মাদরাসা, ছাত্র, চিকিৎসা, পরিবার ও ত্রাণ। আপনার ছোট অবদান বড় পরিবর্তন আনতে পারে।"
+          subtitle="রিজকুন ও মাদ্রাসাঅস থেকে সংগৃহীত অংশ এই ফানেলে এসে জমা হয়—উম্মাহর ভাই-বোনদের জরুরি প্রয়োজনে। আপনার প্রতিটি কেনাকাটার একটি অংশ এখানে সওয়াবে রূপ নেয়।"
         />
 
         {/* filters */}
@@ -185,14 +182,16 @@ function NeedCard({ need }: { need: UmmahNeed }) {
 
         <div className="mt-auto pt-4">
           <Button
+            asChild
             className="w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full"
           >
-            <Heart className="h-4 w-4 mr-1.5" />
-            অবদান রাখুন
+            <a href="#solution">
+              <Heart className="h-4 w-4 mr-1.5" />
+              অবদান রাখুন
+            </a>
           </Button>
         </div>
       </div>
     </article>
   );
 }
-

@@ -60,14 +60,14 @@ export function DevelopingStory() {
     <section id="story" className="relative py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="চলমান গল্প"
+          eyebrow="আমাদের যাত্রা"
           title={
             <>
               প্রতিটি ধাপে{" "}
               <span className="text-gradient-gold">আল্লাহর রহমত</span>
             </>
           }
-          subtitle="আমাদের প্রতিটি প্রজেক্ট ধাপে ধাপে এগোয়। কবে কোথায় গিয়েছি, কী হয়েছে, কত সংগৃহীত ও কত প্রয়োজন — সব এক টাইমলাইনে।"
+          subtitle="নেকির ঝুড়ির মিশন ধাপে ধাপে এগোয়—রিজকুন ও মাদ্রাসাঅস কীভাবে গড়ে উঠছে, কত পরিবার ও প্রতিষ্ঠান যুক্ত হচ্ছে, সব এক টাইমলাইনে।"
         />
 
         {loading ? (
@@ -181,8 +181,8 @@ function StoryDetail({ project }: { project: Project }) {
               </div>
             </div>
 
-            <Button className="mt-5 w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full">
-              এই প্রজেক্টে অবদান রাখুন
+            <Button asChild className="mt-5 w-full bg-emerald-deep hover:bg-emerald text-primary-foreground rounded-full">
+              <a href="#solution">এই মিশনে যুক্ত হোন</a>
             </Button>
           </div>
         </div>
