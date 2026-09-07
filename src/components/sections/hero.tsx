@@ -49,7 +49,7 @@ export function Hero() {
             className="font-display font-800 text-4xl sm:text-5xl lg:text-6xl text-cream leading-[1.1] mb-6 animate-rise"
             style={{ animationDelay: "0.1s" }}
           >
-            দুনিয়ার কেনাকাটা ও খেদমত,{" "}
+            দুনিয়ার Needs,{" "}
             <span className="relative inline-block">
               <span className="text-gradient-gold">এবার হবে</span>
               <svg
@@ -77,7 +77,7 @@ export function Hero() {
             আপনার প্রতিদিনের ব্যস্ততা, পরিবারের দায়িত্ব আর প্রাতিষ্ঠানিক কাজগুলো
             শুধু দুনিয়ার চাকা ঘোরায় না। &ldquo;নেকির ঝুড়ি&rdquo;-এর সাথে যুক্ত হয়ে
             আপনার দৈনন্দিন প্রয়োজন মেটানোর মাধ্যমেই নির্মিত হোক আপনার আখিরাতের
-            বৃহৎ এক ঝুড়ি—যা অবিরাম সওয়াবের কারণ হয়ে থাকবে।
+            বড় এক ঝুড়ি—যা অবিরাম সওয়াবের কারণ হয়ে থাকবে।
           </p>
 
           <div
@@ -113,7 +113,7 @@ export function Hero() {
             style={{ animationDelay: "0.4s" }}
           >
             {[
-              { n: "২", l: "খেদমতের মডিউল" },
+              { n: "২", l: "মডিউল" },
               { n: "৫৫%", l: "ফানেলে যায়" },
               { n: "১০০%", l: "নিয়তের ইখলাস" },
             ].map((s) => (

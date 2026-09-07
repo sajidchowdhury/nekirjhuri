@@ -2,7 +2,6 @@ import { SiteHeader } from "@/components/sections/site-header";
 import { Hero } from "@/components/sections/hero";
 import { Concept } from "@/components/sections/concept";
 import { SuccessVision } from "@/components/sections/success-vision";
-import { Policy } from "@/components/sections/policy";
 import { ModulesFunnel } from "@/components/sections/modules-funnel";
 import { UmmahNeeds } from "@/components/sections/ummah-needs";
 import { DevelopingStory } from "@/components/sections/developing-story";
@@ -18,7 +17,6 @@ export default function Home() {
         <Hero />
         <Concept />
         <SuccessVision />
-        <Policy />
         <ModulesFunnel />
         <UmmahNeeds />
         <DevelopingStory />

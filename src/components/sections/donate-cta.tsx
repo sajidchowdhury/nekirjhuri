@@ -107,7 +107,7 @@ export async function DonateCta() {
               >
                 <Link href="#solution">
                   <BookOpen className="h-5 w-5 mr-2" />
-                  মাদ্রাসাঅস নিন
+                  MadrashaOS নিন
                 </Link>
               </Button>
               <p className="flex items-center gap-1.5 text-xs text-cream/60 lg:text-right">

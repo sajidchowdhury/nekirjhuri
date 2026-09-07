@@ -54,14 +54,14 @@ export function FixedProjects() {
     <section id="projects" className="relative py-16 lg:py-20 bg-cream-deep/50 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="সেবাধীন প্রতিষ্ঠান"
+          eyebrow="চলমান প্রজেক্ট"
           title={
             <>
-              যেসব মাদরাসা{" "}
-              <span className="text-gradient-gold">মাদ্রাসাঅসে যুক্ত</span>
+              যেসব প্রতিষ্ঠান{" "}
+              <span className="text-gradient-gold">নিয়মিত চলছে</span>
             </>
           }
-          subtitle="মাদ্রাসাঅসের মাধ্যমে ডিজিটাল হওয়া প্রতিষ্ঠানগুলো—যেগুলো এখন নেকির ঝুড়ির মূল কনসেপ্টের সাথে যুক্ত। প্রতিটি প্রতিষ্ঠান থেকে শুরু হয় একটি পরিবার থেকে সমাজের আত্মিক বিপ্লব।"
+          subtitle="আমাদের চলমান প্রতিষ্ঠান—মাদরাসা, মক্তব, এতিমখানা—যেগুলো নেকির ঝুড়ির মূল কনসেপ্টের সাথে যুক্ত। প্রতিটি প্রতিষ্ঠান থেকে শুরু হয় একটি পরিবার থেকে সমাজের আত্মিক বিপ্লব।"
         />
 
         {loading ? (
