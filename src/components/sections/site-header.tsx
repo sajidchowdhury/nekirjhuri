@@ -14,7 +14,6 @@ import {
 
 const DEFAULT_NAV = [
   { href: "#concept", label: "কনসেপ্ট" },
-  { href: "#problem", label: "সমস্যা" },
   { href: "#solution", label: "সমাধান" },
   { href: "#needs", label: "ফানেলের গন্তব্য" },
   { href: "#story", label: "যাত্রা" },

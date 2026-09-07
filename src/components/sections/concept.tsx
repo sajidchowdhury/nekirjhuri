@@ -72,7 +72,7 @@ export function Concept() {
               <span className="text-gradient-gold">ইবাদতের মাধ্যম</span>
             </>
           }
-          subtitle="একটা সত্য আমরা সবাই জানি—একদিন এই দুনিয়া ছেড়ে যেতে হবে। কবরের অন্ধকারে সাথে যাবে শুধু আমাদের আমল। নেকির ঝুড়ি এমন একটি ছাতা—যার একপ্রান্ত যুক্ত দুনিয়ার দৈনন্দিন আসবাবের সাথে, আর অন্য প্রান্ত চলে গেছে কবরের অন্ধকার টানেল পেরিয়ে আখিরাতে।"
+          subtitle="একটা সত্য আমরা সবাই জানি—একদিন এই দুনিয়া ছেড়ে যেতে হবে। কবরের অন্ধকারে সাথে যাবে শুধু আমাদের আমল। নেকির ঝুড়ি এমন একটি ফানেল—যার একপ্রান্ত যুক্ত দুনিয়ার দৈনন্দিন আসবাবের সাথে, আর অন্য প্রান্ত চলে গেছে কবরের অন্ধকার টানেল পেরিয়ে আখিরাতে।"
         />
 
         <div className="mt-14 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -82,7 +82,7 @@ export function Concept() {
               {/* stage 1 — modules carousel */}
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-600 uppercase tracking-wider text-emerald-deep/70">
-                  ১. দুনিয়াবি মডিউল
+                  দুনিয়াবি মডিউল
                 </p>
                 {modules.length > VISIBLE_COUNT && (
                   <div className="flex gap-1">
@@ -165,7 +165,7 @@ export function Concept() {
 
               {/* stage 2 — funnel */}
               <p className="text-xs font-600 uppercase tracking-wider text-emerald-deep/70 mb-3 text-center">
-                ২. নেকির ঝুড়ি ফানেল
+                নেকির ঝুড়ি ফানেল
               </p>
               <div className="flex justify-center">
                 <div className="w-full max-w-[260px]">
@@ -185,10 +185,10 @@ export function Concept() {
 
               {/* tunnel */}
               <div className="flex justify-center mt-1">
-                <div className="relative w-24">
+                <div className="relative w-32">
                   <div className="mx-auto w-px h-10 bg-gradient-to-b from-gold/60 to-emerald-deep/40" />
-                  <div className="h-14 w-full rounded-b-2xl bg-gradient-to-b from-emerald-deep/40 to-emerald-deep border-x border-b border-emerald-deep/40 flex items-end justify-center pb-2">
-                    <span className="text-[10px] text-cream/80 font-500">
+                  <div className="h-16 w-full rounded-b-2xl bg-gradient-to-b from-emerald-deep/40 to-emerald-deep border-x border-b border-emerald-deep/40 flex items-end justify-center pb-2.5">
+                    <span className="text-base text-cream/90" style={{ fontWeight: 700 }}>
                       কবর → আখিরাত
                     </span>
                   </div>
@@ -201,10 +201,10 @@ export function Concept() {
           <div className="order-1 lg:order-2 space-y-5">
             <div className="glass-card rounded-2xl p-5 sm:p-6">
               <h3 className="font-display font-700 text-xl text-emerald-deep mb-2">
-                ছাতা বা ফানেল
+                ফানেল
               </h3>
               <p className="text-foreground/75 leading-relaxed">
-                &ldquo;নেকির ঝুড়ি&rdquo; এমন একটি ছাতা বা ফানেল, যার একপ্রান্ত
+                &ldquo;নেকির ঝুড়ি&rdquo; এমন একটি ফানেল, যার একপ্রান্ত
                 যুক্ত দুনিয়ার দৈনন্দিন ব্যবহার্য আসবাবের সাথে, আর অন্য প্রান্ত চলে
                 গেছে কবরের অন্ধকার টানেল পেরিয়ে আখিরাতে। আল্লাহ আমাদের মেধা ও
                 সময় দিয়েছেন দুনিয়ার জন্য—আর এই আসবাবকে ব্যবহার করে আখিরাত
@@ -224,8 +224,8 @@ export function Concept() {
                 desc="মেধা ও সময়কে পুঁজি করে দুনিয়াবি উসিলায় আখিরাত ইমপ্রুভ।"
               />
               <PointCard
-                step="ফানেল"
-                title="ছাতার সংযোগ"
+                step="সংযোগ"
+                title="ফানেলের সংযোগ"
                 desc="এক প্রান্ত দুনিয়ার কেনাকাটা, অন্য প্রান্ত কবরের টানেল পেরিয়ে আখিরাতে।"
               />
               <PointCard
@@ -241,10 +241,10 @@ export function Concept() {
             </p>
 
             <Link
-              href="#problem"
+              href="#solution"
               className="inline-flex items-center gap-1.5 text-emerald-deep font-600 hover:gap-2.5 transition-all"
             >
-              সমস্যাটা বুঝুন
+              সমাধান দেখুন
               <ArrowDown className="h-4 w-4" />
             </Link>
           </div>
